@@ -1,70 +1,38 @@
-import java.io.*;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 public class AuthenticationModule {
+    private final UserManager userManager;
 
-    private static final String USERS_FILE = "users.txt";
-    private static final String ALGORITHM = "AES";
-    
-    private Map<String, String> users;
-
-    public AuthenticationModule() {
-        users = new HashMap<>();
-        loadUsers();
-    }
-
-    public boolean registerUser(String username, String password) {
-        if (users.containsKey(username)) {
-            return false; 
-        }
-        String encryptedPassword = encryptPassword(password);
-        users.put(username, encryptedPassword);
-        saveUsers();
-        return true;
+    public AuthenticationModule(UserManager userManager) {
+        this.userManager = userManager;
     }
 
     public boolean authenticateUser(String username, String password) {
-        String encryptedPassword = users.get(username);
-        if (encryptedPassword == null) {
-            return false; 
+        String storedHash = userManager.getPasswordHash(username);
+        if (storedHash == null) {
+            return false;
         }
-        String inputEncryptedPassword = encryptPassword(password);
-        return encryptedPassword.equals(inputEncryptedPassword);
+        return verifyPassword(password, storedHash);
     }
 
-    private String encryptPassword(String password) {
+    
+
+    private boolean verifyPassword(String password, String storedHash) {
         try {
-            
-            return Base64.getEncoder().encodeToString(password.getBytes());
+            String[] parts = storedHash.split(":");
+            byte[] salt = Base64.getDecoder().decode(parts[0]);
+            byte[] storedPasswordHash = Base64.getDecoder().decode(parts[1]);
+
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(salt);
+            byte[] computedHash = md.digest(password.getBytes());
+
+            return MessageDigest.isEqual(storedPasswordHash, computedHash);
         } catch (Exception e) {
-            throw new RuntimeException("Error encrypting password", e);
-        }
-    }
-
-    private void loadUsers() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(USERS_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(":");
-                if (parts.length == 2) {
-                    users.put(parts[0], parts[1]);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading user data.");
-        }
-    }
-
-    private void saveUsers() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(USERS_FILE))) {
-            for (Map.Entry<String, String> entry : users.entrySet()) {
-                writer.write(entry.getKey() + ":" + entry.getValue());
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            System.out.println("Error saving user data.");
+            e.printStackTrace();
+            return false;
         }
     }
 }
