@@ -15,6 +15,7 @@ public class SecureStorageManagerGUI extends JFrame {
     private JFileChooser fileChooserWithDir;
     private SecureStorage secureStorage;
     private UserManager userManager;
+    private AuthenticationModule authenticationModule;
     private String loggedInUser;
     private BackupManager backupData;
     private JPanel loginPanel, buttonPanel;
@@ -27,6 +28,7 @@ public class SecureStorageManagerGUI extends JFrame {
         secureStorage = new SecureStorage(); // AES-based SecureStorage class
         userManager = new UserManager();
         backupData = new BackupManager();
+        authenticationModule = new AuthenticationModule(userManager);
         fileChooserWithDir = new JFileChooser();
         fileChooserWithDir.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooserWithDir.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -161,7 +163,7 @@ public class SecureStorageManagerGUI extends JFrame {
     private void loginUser() {
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
-        if (userManager.authenticateUser(username, password)) {
+        if (authenticationModule.authenticateUser(username, password)) {
             loggedInUser = username;
             switchToMainPanel();
         } else {
