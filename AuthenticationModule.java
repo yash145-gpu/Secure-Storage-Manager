@@ -1,10 +1,6 @@
 import javax.swing.*;
 import java.sql.*;
-
-
-
-
-public class AuthenticationModule {
+public class AuthenticationModule{
     static void loginUser(JTextField usernameField , JPasswordField passwordField,JFrame logi , JFrame bod) {
         String username = usernameField.getText().trim();
 
@@ -16,9 +12,8 @@ public class AuthenticationModule {
             return;
         }
         if (username.equals("admin") && password.equals("admin")) {
-            logi.dispose();
             AdminTools ad = new AdminTools();
-
+            logi.setVisible(false);
             return;
         }
         try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL);
@@ -41,6 +36,7 @@ public class AuthenticationModule {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
         }
+
     }
 
 }
