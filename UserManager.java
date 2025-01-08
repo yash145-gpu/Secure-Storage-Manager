@@ -1,80 +1,46 @@
-import java.io.*;
+import javax.swing.*;
 import java.security.MessageDigest;
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class UserManager {
-    private static final String USERS_FILE = "src/users.txt";
-    private final Map<String, String> users = new HashMap<>();
 
-    public UserManager() {
-        ensureFileExists();
-        loadUsers();
-    }
+    protected static void registerUser(JTextField usernameField,JPasswordField passwordField) {
+        DbHandler.setupDatabase();
+        String username = usernameField.getText().trim();
+        String password = new String(passwordField.getPassword()).trim();
 
-    private void ensureFileExists() {
-        File usersFile = new File(USERS_FILE);
-        if (!usersFile.exists()) {
-            try {
-                usersFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(null,"Fields cannot be empty");
+            return;
+        }
+        try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO userdata (name, password) VALUES (?, ?)")) {
+            pstmt.setString(1, username);
+            pstmt.setString(2, hashPassword(password));
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
+
         }
     }
-    public String getPasswordHash(String username) {
-    return users.get(username);
-}
-
-    private void loadUsers() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(USERS_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(":", 2);
-                if (parts.length == 2) {
-                    users.put(parts[0], parts[1]); 
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public boolean registerUser(String username, String password) {
-        if (users.containsKey(username)) {
-            return false;
-        }
-        String hashedPassword = hashPassword(password); // Hash the password
-        users.put(username, hashedPassword);
-        saveUsers();
-        return true;
-    }
-
-    private void saveUsers() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(USERS_FILE))) {
-            for (Map.Entry<String, String> entry : users.entrySet()) {
-                writer.write(entry.getKey() + ":" + entry.getValue());
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    public String hashPassword(String password) {
+    protected static String hashPassword(String password) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] salt = new byte[16];
-            new SecureRandom().nextBytes(salt);
-            md.update(salt);
-            byte[] hashedPassword = md.digest(password.getBytes());
-            return Base64.getEncoder().encodeToString(salt) + ":" + Base64.getEncoder().encodeToString(hashedPassword);
-        } catch (Exception e) {
-            throw new RuntimeException("Error hashing password", e);
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes());
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                hexString.append(String.format("%02x", b));
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            JOptionPane.showMessageDialog(null,"Error in Hashing/Algo not found" + e.getMessage() + "\n");
+            return null;
         }
     }
-
-    
-
 }
+
