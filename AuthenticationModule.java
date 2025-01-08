@@ -1,38 +1,47 @@
-import java.security.MessageDigest;
-import java.security.SecureRandom;
-import java.util.Base64;
+import javax.swing.*;
+import java.sql.*;
+
+
+
 
 public class AuthenticationModule {
-    private final UserManager userManager;
+    static void loginUser(JTextField usernameField , JPasswordField passwordField,JFrame logi , JFrame bod) {
+        String username = usernameField.getText().trim();
 
-    public AuthenticationModule(UserManager userManager) {
-        this.userManager = userManager;
-    }
+        String password = new String(passwordField.getPassword()).trim();
 
-    public boolean authenticateUser(String username, String password) {
-        String storedHash = userManager.getPasswordHash(username);
-        if (storedHash == null) {
-            return false;
+        if (username.isEmpty() || password.isEmpty()) {
+
+            JOptionPane.showMessageDialog(null,"Fields cannot be empty");
+            return;
         }
-        return verifyPassword(password, storedHash);
-    }
+        if (username.equals("admin") && password.equals("admin")) {
+            logi.dispose();
+            AdminTools ad = new AdminTools();
 
-    
+            return;
+        }
+        try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM userdata WHERE name = ? AND password = ?")) {
+            pstmt.setString(1, username);
+            pstmt.setString(2, UserManager.hashPassword(password));
+            ResultSet rs = pstmt.executeQuery();
 
-    private boolean verifyPassword(String password, String storedHash) {
-        try {
-            String[] parts = storedHash.split(":");
-            byte[] salt = Base64.getDecoder().decode(parts[0]);
-            byte[] storedPasswordHash = Base64.getDecoder().decode(parts[1]);
+            if (rs.next()) {
+                GUI.loggedInUser = username;
+                logi.setVisible(false);
+                bod.setTitle("Welcome "+GUI.loggedInUser);
+                bod.setVisible(true);
 
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(salt);
-            byte[] computedHash = md.digest(password.getBytes());
 
-            return MessageDigest.isEqual(storedPasswordHash, computedHash);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+
+            } else {
+                JOptionPane.showMessageDialog(null,"Invalid username or password");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
         }
     }
+
 }
+
