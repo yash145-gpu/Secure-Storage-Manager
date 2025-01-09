@@ -1,7 +1,9 @@
 import javax.swing.*;
 import java.sql.*;
-public class AuthenticationModule{
-    static void loginUser(JTextField usernameField , JPasswordField passwordField,JFrame logi , JFrame bod) {
+
+class AuthenticationModule{
+
+    protected static void loginUser(JTextField usernameField , JPasswordField passwordField,JFrame logi , JFrame bod) {
         String username = usernameField.getText().trim();
 
         String password = new String(passwordField.getPassword()).trim();
@@ -27,9 +29,6 @@ public class AuthenticationModule{
                 logi.setVisible(false);
                 bod.setTitle("Welcome "+GUI.loggedInUser);
                 bod.setVisible(true);
-
-
-
             } else {
                 JOptionPane.showMessageDialog(null,"Invalid username or password");
             }
@@ -40,4 +39,3 @@ public class AuthenticationModule{
     }
 
 }
-
