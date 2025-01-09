@@ -19,9 +19,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class SecurityTools {
-    static final ExecutorService executor = Executors.newFixedThreadPool(4);
-
-    static final String DB_URL = "jdbc:sqlite:unified.db";
+   private static final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private static final String DB_URL = "jdbc:sqlite:unified.db";
     static void encryptFileToDatabase(JTextArea feedbackArea, GUI obj) {
         executor.submit(() -> {
         JFileChooser fileChooser = new JFileChooser();
@@ -29,7 +28,6 @@ public class SecurityTools {
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             try {
-
                 KeyGenerator keyGen = KeyGenerator.getInstance("AES");
                 keyGen.init(128, new SecureRandom());
                 SecretKey secretKey = keyGen.generateKey();
@@ -74,9 +72,8 @@ public class SecurityTools {
         }
         });
     }
-
-
-    static void decryptFileFromDatabase(JTextArea feedbackArea, GUI obj) {
+    
+     static void decryptFileFromDatabase(JTextArea feedbackArea, GUI obj) {
         executor.submit(() -> {
             int fileidx = Integer.parseInt(JOptionPane.showInputDialog(obj, "Enter file index to decrypt:"));
             System.out.println(fileidx);
@@ -189,7 +186,7 @@ public class SecurityTools {
         });
     }
 
-    protected static String hashfile(File file,JTextArea feedbackArea) {
+    protected static void hashfile(File file,JTextArea feedbackArea) {
         executor.submit(() -> {
         try {
 
@@ -230,9 +227,8 @@ System.out.println( hexString.toString());
             return null;
         }
         });
-    return null;
+
     }
 }
-
 
 
