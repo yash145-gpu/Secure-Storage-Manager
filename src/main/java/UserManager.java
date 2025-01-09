@@ -6,7 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class UserManager {
+class UserManager {
 
     protected static void registerUser(JTextField usernameField,JPasswordField passwordField) {
         DbHandler.setupDatabase();
@@ -38,9 +38,8 @@ public class UserManager {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            JOptionPane.showMessageDialog(null,"Error in Hashing/Algo not found" + e.getMessage() + "\n");
+            JOptionPane.showMessageDialog(null,"Error in Hashing ,Algorithm class not found" + e.getMessage() + "\n");
             return null;
         }
     }
 }
-
