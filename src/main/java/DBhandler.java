@@ -3,6 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.sql.*;
 public class DbHandler {
     static final String DB_URL = "jdbc:sqlite:unified.db";
+
     private static final String CREATE_USERDATA_TABLE_SQL =
             "CREATE TABLE IF NOT EXISTS userdata (id INTEGER PRIMARY KEY AUTOINCREMENT ,name TEXT NOT NULL, password TEXT NOT NULL)";
 
@@ -55,7 +56,6 @@ public class DbHandler {
         for (int i = 1; i <= columnCount; i++) {
             tableModel.addColumn(metaData.getColumnName(i));
         }
-
         while (rs.next()) {
             Object[] row = new Object[columnCount];
             for (int i = 1; i <= columnCount; i++) {
@@ -65,21 +65,27 @@ public class DbHandler {
         }
     }
 
-    static void deletefile(JTextArea feedbackArea,String fs)
+    static void deletefile(JTextArea feedbackArea,String fs,int id) {
+        String query;
+        {
+            if (fs == null) {
+                query = "Delete FROM files where id = ?";
+                fs = String.valueOf(id);
+            } else {
+                query = "DELETE FROM files WHERE filename = ?";
+            }
+            try (Connection conn = DriverManager.getConnection(DB_URL);
+                 PreparedStatement stmt = conn.prepareStatement(query); PreparedStatement keyStmt = conn.prepareStatement(
+                    "DELETE FROM keys WHERE filename=?")) {
 
-    {
-        String query = "DELETE FROM files WHERE filename = ?";
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement stmt = conn.prepareStatement(query); PreparedStatement keyStmt = conn.prepareStatement(
-                "DELETE FROM keys WHERE filename=?")) {
-
-            stmt.setString(1, fs);
-            int rowsAffected = stmt.executeUpdate();
-            keyStmt.setString(1,fs);
-             rowsAffected+=keyStmt.executeUpdate();
-            feedbackArea.append( rowsAffected + " rows deleted.");
-        } catch (Exception e) {
-            e.printStackTrace(System.out);
+                stmt.setString(1, fs);
+                int rowsAffected = stmt.executeUpdate();
+                keyStmt.setString(1, fs);
+                rowsAffected += keyStmt.executeUpdate();
+                feedbackArea.append(rowsAffected + " rows deleted.");
+            } catch (Exception e) {
+                e.printStackTrace(System.out);
+            }
         }
     }
     static void deleteuser(JTextArea feedbackArea , String urs)
@@ -100,7 +106,6 @@ public class DbHandler {
              PreparedStatement stmt = conn.prepareStatement(query2)) {
             stmt.setString(1, urs);
             int rowsAffected = stmt.executeUpdate();
-
             feedbackArea.append( rowsAffected + " rows deleted.");
         } catch (Exception e) {
             e.printStackTrace(System.out);
