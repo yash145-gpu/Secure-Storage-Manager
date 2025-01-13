@@ -1,10 +1,7 @@
 import javax.swing.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 class UserManager {
 
@@ -15,6 +12,10 @@ class UserManager {
 
         if (username.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(null,"Fields cannot be empty");
+            return;
+        }
+        if(userNameAlreadyExists(username)){
+            JOptionPane.showMessageDialog(null,"Username already exists");
             return;
         }
         try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL);
@@ -38,8 +39,25 @@ class UserManager {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            JOptionPane.showMessageDialog(null,"Error in Hashing ,Algorithm class not found" + e.getMessage() + "\n");
+            JOptionPane.showMessageDialog(null,"Error in Hashing/Algo not found" + e.getMessage() + "\n");
             return null;
         }
     }
+private static boolean userNameAlreadyExists(String username){
+    try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL);
+         PreparedStatement pstmt = conn.prepareStatement("SELECT 1 from userdata where name=?")) {
+        pstmt.setString(1, username);
+        try (ResultSet rs = pstmt.executeQuery()) {
+            return rs.next();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
+
+        }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
+
+    }
+    return false;
+    }
 }
+
