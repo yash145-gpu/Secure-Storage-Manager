@@ -20,8 +20,7 @@ public class GUI extends JFrame implements Runnable{
     private final JComboBox<File> driveComboBox;
     private final JPanel filePanel;
     private final JButton backButton;
-    //protected ImageIcon imz = new ImageIcon(getClass().getResource()"Images/ism.png");
-
+   
     GUI(){
       run();
         JPanel backgroundPanel = new JPanel() {
