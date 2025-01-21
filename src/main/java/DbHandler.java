@@ -3,25 +3,20 @@ import javax.swing.table.DefaultTableModel;
 import java.sql.*;
 public class DbHandler {
     static final String DB_URL = "jdbc:sqlite:unified.db";
-
     private static final String CREATE_USERDATA_TABLE_SQL =
-            "CREATE TABLE IF NOT EXISTS userdata (id INTEGER PRIMARY KEY AUTOINCREMENT ,name TEXT NOT NULL, password TEXT NOT NULL)";
-
+            "CREATE TABLE IF NOT EXISTS userdata (id INTEGER PRIMARY KEY AUTOINCREMENT ,username TEXT NOT NULL UNIQUE , password TEXT NOT NULL)";
     static final String CREATE_FILES_TABLE_SQL =
-            "CREATE TABLE IF NOT EXISTS files(id INTEGER PRIMARY KEY AUTOINCREMENT,filename TEXT NOT NULL,filedata BLOB NOT NULL,user TEXT NOT NULL, isEncrypted BOOLEAN NOT NULL DEFAULT 0)";
-
+            "CREATE TABLE IF NOT EXISTS files(id INTEGER PRIMARY KEY AUTOINCREMENT,filename TEXT NOT NULL,filedata BLOB NOT NULL,username TEXT NOT NULL, isEncrypted BOOLEAN NOT NULL DEFAULT 0)";
     static final String CREATE_KEYS_TABLE_SQL =
-            "CREATE TABLE IF NOT EXISTS keys (kid INTEGER PRIMARY KEY AUTOINCREMENT,id INTEGER,user TEXT NOT NULL,filename TEXT NOT NULL, key TEXT NOT NULL,FOREIGN KEY (id) REFERENCES files(id) ON DELETE CASCADE)";
+            "CREATE TABLE IF NOT EXISTS keys (keyId INTEGER PRIMARY KEY AUTOINCREMENT,id INTEGER, username TEXT NOT NULL , filename TEXT NOT NULL, key TEXT NOT NULL,FOREIGN KEY (id) REFERENCES files(id) ON DELETE CASCADE,FOREIGN KEY (username) REFERENCES userdata(username) ON DELETE CASCADE)";
 
   static void setupDatabase() {
-
         try (Connection conn = DriverManager.getConnection(DB_URL);
              Statement stmt = conn.createStatement()) {
             stmt.execute("PRAGMA foreign_keys = ON");
             stmt.execute(CREATE_FILES_TABLE_SQL);
             stmt.execute(CREATE_USERDATA_TABLE_SQL);
             stmt.execute(CREATE_KEYS_TABLE_SQL);
-            JOptionPane.showMessageDialog(null,"Database setup successful");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null,"Error setting up database: \n" + e.getMessage() + "\n");
         }
@@ -77,7 +72,6 @@ public class DbHandler {
             try (Connection conn = DriverManager.getConnection(DB_URL);
                  PreparedStatement stmt = conn.prepareStatement(query); PreparedStatement keyStmt = conn.prepareStatement(
                     "DELETE FROM keys WHERE filename=?")) {
-
                 stmt.setString(1, fs);
                 int rowsAffected = stmt.executeUpdate();
                 keyStmt.setString(1, fs);
@@ -89,29 +83,29 @@ public class DbHandler {
         }
     }
     static void deleteuser(JTextArea feedbackArea , String urs)
-
     {
-        String query = "DELETE FROM userdata WHERE name = ?";
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+             Statement stmt = conn.createStatement()) {
+            stmt.execute("PRAGMA foreign_keys = ON");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null,"Error setting up database: \n" + e.getMessage() + "\n");
+        }
+        String query = "DELETE FROM userdata WHERE username = ?";
+        String query2 ="DELETE FROM files WHERE username= ?";
+        String query3 ="DELETE FROM keys where username=?";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement stmt = conn.prepareStatement(query); PreparedStatement s2tmt = conn.prepareStatement(query2);
+             PreparedStatement s3mt= conn.prepareStatement(query3)) {
             stmt.setString(1, urs);
-            int rowsAffected = stmt.executeUpdate();
-
+            s2tmt.setString(1, urs);
+            s3mt.setString(1,urs);
+            int rowsAffected = stmt.executeUpdate()+s2tmt.executeUpdate()+s3mt.executeUpdate();
             feedbackArea.append( rowsAffected + " rows deleted.");
         } catch (Exception e) {
             e.printStackTrace(System.out);
         }
-        String query2 ="delete from files where user= ?";
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement stmt = conn.prepareStatement(query2)) {
-            stmt.setString(1, urs);
-            int rowsAffected = stmt.executeUpdate();
-            feedbackArea.append( rowsAffected + " rows deleted.");
-        } catch (Exception e) {
-            e.printStackTrace(System.out);
-        }
-    }
 
     }
 
+    }
 
