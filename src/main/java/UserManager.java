@@ -5,7 +5,7 @@ import java.sql.*;
 
 class UserManager {
 
-    protected static void registerUser(JTextField usernameField,JPasswordField passwordField) {
+    protected static void registerUser(JTextField usernameField, JPasswordField passwordField) {
         DbHandler.setupDatabase();
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
@@ -13,13 +13,17 @@ class UserManager {
         if (username.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(null,"Fields cannot be empty");
             return;
-        }
+        }else
         if(userNameAlreadyExists(username)){
             JOptionPane.showMessageDialog(null,"Username already exists");
             return;
+        } else if (username.length() > 12 || password.length() > 12) {
+                  JOptionPane.showMessageDialog(null,"Username & Password length must be under 12 characters");
+                return;
         }
+
         try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO userdata (name, password) VALUES (?, ?)")) {
+             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO userdata(username,password) VALUES (?,?)")) {
             pstmt.setString(1, username);
             pstmt.setString(2, hashPassword(password));
             pstmt.executeUpdate();
@@ -44,8 +48,12 @@ class UserManager {
         }
     }
 private static boolean userNameAlreadyExists(String username){
+        if(username.equals("admin")){
+            return true;
+        }
+
     try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL);
-         PreparedStatement pstmt = conn.prepareStatement("SELECT 1 from userdata where name=?")) {
+         PreparedStatement pstmt = conn.prepareStatement("SELECT 1 from userdata where username=?")) {
         pstmt.setString(1, username);
         try (ResultSet rs = pstmt.executeQuery()) {
             return rs.next();
