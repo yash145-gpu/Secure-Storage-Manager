@@ -11,11 +11,12 @@ public class AdminTools {
 
 JButton view = new JButton("View Users");
 JFrame  mainfr = new JFrame("WELCOME ADMIN");
-        ImageIcon imz = new ImageIcon(getClass().getResource("/Images/ism.png"));
+        ImageIcon imz = new ImageIcon(getClass().getResource("ism.png"));
         mainfr.setIconImage(imz.getImage());
         mainfr.setLayout(new BorderLayout());
-        mainfr.setSize(1280, 720);
+        mainfr.setSize(GUI.screenSize);
         mainfr.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainfr.setExtendedState(JFrame.MAXIMIZED_BOTH);
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BorderLayout());
         JPanel queryInputPanel = new JPanel(new BorderLayout());
@@ -70,7 +71,6 @@ JFrame  mainfr = new JFrame("WELCOME ADMIN");
                    int choice = JOptionPane.showOptionDialog(toolPanel.getParent(),"Enter file to delete","Delete mode",JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null,op,op[0]);
                     if(choice == 0){
                         int id = Integer.parseInt(JOptionPane.showInputDialog("Enter file ID"));
-                        System.out.println("ID = "+id);
                         DbHandler.deletefile(feedbackArea,null,id);
                     }
                     else {
