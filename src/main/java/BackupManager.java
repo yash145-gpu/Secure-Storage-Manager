@@ -8,7 +8,7 @@ public class BackupManager {
     static final String DB_URL = "jdbc:sqlite:unified.db";
     static void saveFileToDatabase(JTextArea feedbackArea, File file) {
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO files (filename, filedata, user) VALUES (?, ?, ?)")) {
+             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO files (filename, filedata, username) VALUES (?, ?, ?)")) {
             pstmt.setString(1, file.getName());
             pstmt.setBytes(2, Files.readAllBytes(file.toPath()));
             pstmt.setString(3, GUI.loggedInUser);
@@ -25,7 +25,7 @@ public class BackupManager {
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             try (Connection conn = DriverManager.getConnection(DB_URL);
-                 PreparedStatement pstmt = conn.prepareStatement("INSERT INTO files (filename, filedata, user) VALUES (?, ?, ?)")) {
+                 PreparedStatement pstmt = conn.prepareStatement("INSERT INTO files (filename, filedata, username) VALUES (?, ?, ?)")) {
                 pstmt.setString(1, file.getName());
                 pstmt.setBytes(2, Files.readAllBytes(file.toPath()));
                 pstmt.setString(3, GUI.loggedInUser);
@@ -43,7 +43,7 @@ public class BackupManager {
             return;
         }
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement("SELECT filedata FROM files WHERE filename = ? AND user = ?")) {
+             PreparedStatement pstmt = conn.prepareStatement("SELECT filedata FROM files WHERE filename = ? AND username = ?")) {
             pstmt.setString(1, filename);
             pstmt.setString(2, GUI.loggedInUser);
             ResultSet rs = pstmt.executeQuery();
