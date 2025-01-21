@@ -1,11 +1,10 @@
 import javax.swing.*;
 import java.sql.*;
 
-class AuthenticationModule{
+public class AuthenticationModule{
 
-    protected static void loginUser(JTextField usernameField , JPasswordField passwordField,JFrame logi , JFrame bod) {
+    static void loginUser(JTextField usernameField , JPasswordField passwordField,JFrame logi , JFrame bod) {
         String username = usernameField.getText().trim();
-
         String password = new String(passwordField.getPassword()).trim();
 
         if (username.isEmpty() || password.isEmpty()) {
@@ -19,7 +18,7 @@ class AuthenticationModule{
             return;
         }
         try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM userdata WHERE name = ? AND password = ?")) {
+             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM userdata WHERE username = ? AND password = ?")) {
             pstmt.setString(1, username);
             pstmt.setString(2, UserManager.hashPassword(password));
             ResultSet rs = pstmt.executeQuery();
@@ -29,13 +28,12 @@ class AuthenticationModule{
                 logi.setVisible(false);
                 bod.setTitle("Welcome "+GUI.loggedInUser);
                 bod.setVisible(true);
+
             } else {
                 JOptionPane.showMessageDialog(null,"Invalid username or password");
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
         }
-
     }
-
 }
