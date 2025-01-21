@@ -37,12 +37,9 @@ public class FileManager {
                             case 1:
                                 SecurityTools.encryptFileToDatabase(feedbackArea,file);
                                 break;
-                            default:
-                                System.out.println("Action canceled.");
                         }
                     }
                 });
-
                 filePanel.add(fileButton);
             }
         }
@@ -56,4 +53,3 @@ public class FileManager {
         }
     }
 }
-
