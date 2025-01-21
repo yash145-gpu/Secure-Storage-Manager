@@ -11,7 +11,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
 public class GUI extends JFrame implements Runnable{
-    protected static JFrame login,mainfr;
+    protected static JFrame login, mainframe;
     private static BufferedImage img;
     protected static String loggedInUser;
     private final JLabel label1,label2,srl;
@@ -20,7 +20,8 @@ public class GUI extends JFrame implements Runnable{
     private final JComboBox<File> driveComboBox;
     private final JPanel filePanel;
     private final JButton backButton;
-   
+    protected static Dimension screenSize;
+
     GUI(){
       run();
         JPanel backgroundPanel = new JPanel() {
@@ -29,42 +30,48 @@ public class GUI extends JFrame implements Runnable{
                     g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
             }
         };
-        ImageIcon imz = new ImageIcon(getClass().getResource("/Images/ism.png"));
+        screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int screenWidth = screenSize.width;
+        int screenHeight = screenSize.height;
+        int sw = screenWidth - 620;
+        int sh = screenHeight - 654;
+        ImageIcon imz = new ImageIcon(getClass().getResource("ism.png"));
         login = new JFrame("Login");
         login.setIconImage(imz.getImage());
         login.setLayout(new BorderLayout());
-        login.setSize(1280, 720);
+        login.setSize(screenWidth, screenHeight);
         login.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        login.setExtendedState(JFrame.MAXIMIZED_BOTH);
         backgroundPanel.setLayout(null);
 
         JLabel label3 = new JLabel("Username");
-        label3.setFont(new Font("ARIAL", Font.BOLD, 25));
+        label3.setFont(new Font("ARIAL", Font.BOLD, 26));
         label3.setForeground(Color.WHITE);
-        label3.setBounds(750, 140, 300, 50);
+        label3.setBounds(sw, sh, 300, 50);
         backgroundPanel.add(label3);
-        JTextField usrfield = new JTextField();
-        usrfield.setBounds(750, 200, 320, 40);
-        backgroundPanel.add(usrfield);
+        JTextField userField = new JTextField();
+        userField.setBounds(sw, sh+70, 320, 40);
+        backgroundPanel.add(userField);
 
         JLabel label4= new JLabel("Password");
-        label4.setFont(new Font("Arial", Font.BOLD, 25));
+        label4.setFont(new Font("Arial", Font.BOLD, 26));
         label4.setForeground(Color.WHITE);
-        label4.setBounds(750, 260, 300, 50);
+        label4.setBounds(sw, sh+150, 300, 50);
 
         JPasswordField passwdField = new JPasswordField();
-        passwdField.setBounds(750, 320, 320, 40);
+        passwdField.setBounds(sw, sh+230, 320, 40);
         backgroundPanel.add(passwdField);
         backgroundPanel.add(label4);
         JButton Log = new JButton("LOGIN");
-        Log.setFont(new Font("Arial",2,17));
-        Log.setBounds(750, 410, 150, 40);
+        Log.setFont(new Font("Arial", Font.ITALIC,17));
+        Log.setBounds(sw, sh+320, 150, 40);
         Log.setForeground(Color.WHITE);
         Log.setContentAreaFilled(false);
         Log.setFocusable(false);
         backgroundPanel.add(Log);
         JButton Reg = new JButton();
-        Reg.setFont(new Font("Arial",2,17));
-        Reg.setBounds(910, 410, 160, 40);
+        Reg.setFont(new Font("Arial", Font.ITALIC,17));
+        Reg.setBounds(sw+160, sh+320, 160, 40);
         Reg.setText("REGISTER");
         Reg.setForeground(Color.WHITE);
         Reg.setContentAreaFilled(false);
@@ -76,22 +83,24 @@ public class GUI extends JFrame implements Runnable{
             r.x+=70;
             c.setBounds(r);
         }
+        int ox=0,os=0;
+        if(screenWidth > 1366) {os = 4; ox=60;};
         label1 = new JLabel("  Secure Storage");
-        label1.setFont(new Font("Arial", Font.ITALIC, 62));
+        label1.setFont(new Font("Arial", Font.ITALIC, 64+os));
         label1.setForeground(Color.WHITE);
         label1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        label1.setBounds(18, 10, 800, 75);
+        label1.setBounds(18+ox, 10, 550, 75);
         label2 = new JLabel("   Manager");
         label2.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        label2.setFont(new Font("ARIAL", Font.ITALIC, 62));
+        label2.setFont(new Font("ARIAL", Font.ITALIC, 64+os));
         label2.setForeground(Color.WHITE);
-        label2.setBounds(88, 82, 800, 80);
+        label2.setBounds(88+ox, 82, 500, 80);
         srl = new JLabel("<html><u>Github</u></html>");
         srl.setVisible(false);
-        srl.setBounds(250,360,200,170);
+        srl.setBounds(250+ox,360+ox,200,170);
         srl.setForeground(Color.GRAY);
         srl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        srl.setFont(new Font("Arial",1,16));
+        srl.setFont(new Font("Arial", Font.BOLD,16+os));
         backgroundPanel.add(srl);
         backgroundPanel.add(label2);
         backgroundPanel.add(label1);
@@ -117,11 +126,12 @@ public class GUI extends JFrame implements Runnable{
         driveComboBox.setSelectedIndex(0);
         backButton.addActionListener(e -> FileManager.navigateBack(filePanel,backButton,feedbackArea,this));
 
-        mainfr = new JFrame();
-        mainfr.setIconImage(imz.getImage());
-        mainfr.setLayout(new BorderLayout());
-        mainfr.setSize(1280, 720);
-        mainfr.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainframe = new JFrame();
+        mainframe.setIconImage(imz.getImage());
+        mainframe.setLayout(new BorderLayout());
+        mainframe.setSize(screenWidth, screenHeight);
+        mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainframe.setExtendedState(JFrame.MAXIMIZED_BOTH);
         JPanel bp = new JPanel();
         bp.setLayout(new BorderLayout());
 
@@ -139,7 +149,7 @@ public class GUI extends JFrame implements Runnable{
         JButton rm_file = new JButton("Remove Files");
         JButton SHA2 = new JButton("SHA-256 File Checksum");
         JButton vk = new JButton("View Keys");
-        vk.addActionListener(e -> { DbHandler.executeSQLQuery(feedbackArea,"SELECT* FROM KEYS",tableModel);});
+        vk.addActionListener(e -> DbHandler.executeSQLQuery(feedbackArea,"SELECT* FROM KEYS",tableModel));
         fileButtonPanel.add(SHA2);
         fileButtonPanel.add(SHA5);
         fileButtonPanel.add(vf);
@@ -160,29 +170,32 @@ public class GUI extends JFrame implements Runnable{
         bp.add(feedbackScrollPane,BorderLayout.EAST);
         bp.add(Menu,BorderLayout.WEST);
         bp.add(tableScrollPane,BorderLayout.CENTER);
-        JButton l_out= new JButton("Logout");
-        l_out.addActionListener(e-> {mainfr.dispose(); login.setVisible(true);});
-;       bp.add(l_out,BorderLayout.SOUTH);
-        mainfr.add(bp);
+        JButton Logout= new JButton("Logout");
+        Logout.addActionListener(e-> {
+            mainframe.dispose(); login.setVisible(true);});
+            bp.add(Logout,BorderLayout.SOUTH);
+        mainframe.add(bp);
 
         rm_file.addActionListener( e -> {
             String[] op = {"ID","Name"};
             int choice = JOptionPane.showOptionDialog(this,"Enter file to delete","Delete mode",JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null,op,op[0]);
             if(choice == 0){
                 int id = Integer.parseInt(JOptionPane.showInputDialog("Enter file ID"));
-                System.out.println("ID = "+id);
                 DbHandler.deletefile(feedbackArea,null,id);
             }
-            else {
+            else if(choice==1){
                 String fs = JOptionPane.showInputDialog("Enter File name");
                 DbHandler.deletefile(feedbackArea, fs,0);
             }
+            else{
+                return;
+            }
         });
-        Log.addActionListener(e -> AuthenticationModule.loginUser(usrfield,passwdField,login,mainfr));
-        Reg.addActionListener(e -> UserManager.registerUser(usrfield,passwdField));
+        Log.addActionListener(e -> AuthenticationModule.loginUser(userField,passwdField,login, mainframe));
+        Reg.addActionListener(e -> UserManager.registerUser(userField,passwdField));
         enc.addActionListener(e -> SecurityTools.encryptFileToDatabase(feedbackArea,this));
-        dec.addActionListener(e -> SecurityTools.decryptFileFromDatabase(feedbackArea,this));
-        vf.addActionListener(e -> {  String query = "select * from files where user= "+"'"+loggedInUser+"'"; DbHandler.executeSQLQuery(feedbackArea,query,tableModel);});
+        dec.addActionListener(e -> SecurityTools.decryptFile(feedbackArea,this));
+        vf.addActionListener(e -> {  String query = "select * from files where username= "+"'"+loggedInUser+"'"; DbHandler.executeSQLQuery(feedbackArea,query,tableModel);});
         SHA2.addActionListener(e -> {    JFileChooser fileChooser = new JFileChooser();
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
@@ -227,15 +240,16 @@ public class GUI extends JFrame implements Runnable{
         }});
         return yp;
     }
-
     public void  run(){
         try{
-            img  = ImageIO.read((Objects.requireNonNull(getClass().getResource("/Images/s12.jpg"))));
+            img  = ImageIO.read((getClass().getResource("s12.jpg")));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }    
-public static void main(String[] args) {
-        SwingUtilities.invokeLater(SecureStorageManagerGUI::new);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(GUI::new);
     }
 }
+
