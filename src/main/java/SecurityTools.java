@@ -48,7 +48,7 @@ public class SecurityTools {
                 try (FileInputStream fis = new FileInputStream(file);
                      CipherOutputStream cos = new CipherOutputStream(encryptedStream, cipher)) {
 
-                    byte[] buffer = new byte[64 * 1024];
+                    byte[] buffer = new byte[1024 * 1024];
                     int bytesRead;
                     while ((bytesRead = fis.read(buffer)) != -1) {
                         cos.write(buffer, 0, bytesRead);
