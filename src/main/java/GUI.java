@@ -16,12 +16,11 @@ public class GUI extends JFrame implements Runnable{
     protected static String loggedInUser;
     private final JLabel label1,label2,srl;
     private final DefaultTableModel tableModel;
-    private final JTextArea feedbackArea;
+    protected final JTextArea feedbackArea;
     private final JComboBox<File> driveComboBox;
     private final JPanel filePanel;
     private final JButton backButton;
     protected static Dimension screenSize;
-
     GUI(){
       run();
         JPanel backgroundPanel = new JPanel() {
@@ -84,12 +83,12 @@ public class GUI extends JFrame implements Runnable{
             c.setBounds(r);
         }
         int ox=0,os=0;
-        if(screenWidth > 1366) {os = 4; ox=60;};
+      if(screenWidth > 1366) {os = 10; ox=80;};
         label1 = new JLabel("  Secure Storage");
         label1.setFont(new Font("Arial", Font.ITALIC, 64+os));
         label1.setForeground(Color.WHITE);
         label1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        label1.setBounds(18+ox, 10, 550, 75);
+        label1.setBounds(18+ox, 10, 600, 80);
         label2 = new JLabel("   Manager");
         label2.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         label2.setFont(new Font("ARIAL", Font.ITALIC, 64+os));
@@ -97,10 +96,9 @@ public class GUI extends JFrame implements Runnable{
         label2.setBounds(88+ox, 82, 500, 80);
         srl = new JLabel("<html><u>Github</u></html>");
         srl.setVisible(false);
-        srl.setBounds(250+ox,360+ox,200,170);
+        srl.setBounds(250+ox,360+ox+ox,200,170);
         srl.setForeground(Color.GRAY);
         srl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        srl.setFont(new Font("Arial", Font.BOLD,16+os));
         backgroundPanel.add(srl);
         backgroundPanel.add(label2);
         backgroundPanel.add(label1);
@@ -108,6 +106,7 @@ public class GUI extends JFrame implements Runnable{
         login.add(backgroundPanel, BorderLayout.CENTER);
         login.setVisible(true);
         feedbackArea = new JTextArea(5, 40);
+        feedbackArea.setFont(new Font("Arial",0,16));
         feedbackArea.setEditable(false);
         JScrollPane feedbackScrollPane = new JScrollPane(feedbackArea);
         JPanel Menu = new JPanel(new BorderLayout());
@@ -165,6 +164,7 @@ public class GUI extends JFrame implements Runnable{
                 component.setFocusable(false);
         }
         JScrollPane tableScrollPane = new JScrollPane(resultTable);
+        feedbackScrollPane.setPreferredSize(new Dimension(600,500));
         feedbackScrollPane.setBackground(Color.GRAY);
         Menu.add(fileButtonPanel,BorderLayout.WEST);
         bp.add(feedbackScrollPane,BorderLayout.EAST);
@@ -172,8 +172,10 @@ public class GUI extends JFrame implements Runnable{
         bp.add(tableScrollPane,BorderLayout.CENTER);
         JButton Logout= new JButton("Logout");
         Logout.addActionListener(e-> {
+            feedbackArea.setText(" ");
             mainframe.dispose(); login.setVisible(true);});
             bp.add(Logout,BorderLayout.SOUTH);
+            
         mainframe.add(bp);
 
         rm_file.addActionListener( e -> {
@@ -191,7 +193,7 @@ public class GUI extends JFrame implements Runnable{
                 return;
             }
         });
-        Log.addActionListener(e -> AuthenticationModule.loginUser(userField,passwdField,login, mainframe));
+        Log.addActionListener(e -> {AuthenticationModule.loginUser(userField,passwdField,login, mainframe);AuthenticationModule.lastLogin(feedbackArea);});
         Reg.addActionListener(e -> UserManager.registerUser(userField,passwdField));
         enc.addActionListener(e -> SecurityTools.encryptFileToDatabase(feedbackArea,this));
         dec.addActionListener(e -> SecurityTools.decryptFile(feedbackArea,this));
@@ -208,11 +210,12 @@ public class GUI extends JFrame implements Runnable{
                 SecurityTools.hashfile(file,feedbackArea,1);}});
         saveFileButton.addActionListener(e ->BackupManager.saveFileToDatabase(feedbackArea,this));
         retrieveFileButton.addActionListener(e ->BackupManager.retrieveFileFromDatabase(feedbackArea,this));
+
     }
 
     private JButton getButton() {
         JButton yp = new JButton();
-        yp.setBounds(0, 0, 570, 720);
+        yp.setBounds(0, 0, 570,(int)screenSize.getHeight());
         yp.setOpaque(false);
         yp.setContentAreaFilled(false);
         yp.setBorderPainted(false);
@@ -224,6 +227,7 @@ public class GUI extends JFrame implements Runnable{
                 label1.setForeground(Color.CYAN);
                 label2.setForeground(Color.CYAN);
                 srl.setVisible(true);
+                srl.setFont(new Font("Arial",Font.BOLD,20));
             }
             @Override
             public void mouseExited(MouseEvent e) {
@@ -246,6 +250,7 @@ public class GUI extends JFrame implements Runnable{
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
     public static void main(String[] args) {
