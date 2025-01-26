@@ -6,7 +6,6 @@ import java.sql.*;
 class UserManager {
 
     protected static void registerUser(JTextField usernameField, JPasswordField passwordField) {
-        DbHandler.setupDatabase();
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
 
