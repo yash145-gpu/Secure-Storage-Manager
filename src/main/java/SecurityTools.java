@@ -34,11 +34,11 @@ public class SecurityTools {
             try {
                 feedbackArea.append("\n-> AES ENCRYPTION IN PROGRESS\n");
                 KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-                keyGen.init(128, new SecureRandom());
+                keyGen.init(256, new SecureRandom());
                 SecretKey secretKey = keyGen.generateKey();
                 String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
 
-                Cipher cipher = Cipher.getInstance("AES");
+                Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
                 cipher.init(Cipher.ENCRYPT_MODE, secretKey);
                 if (localD) {
                     localMode(file,cipher,feedbackArea,encodedKey);
@@ -222,11 +222,11 @@ public class SecurityTools {
                 feedbackArea.append("\n-> AES ENCRYPTION IN PROGRESS\n");
 
                 KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-                keyGen.init(128, new SecureRandom());
+                keyGen.init(256, new SecureRandom());
                 SecretKey secretKey = keyGen.generateKey();
                 String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
 
-                Cipher cipher = Cipher.getInstance("AES");
+                Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
                 cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 
                 if (localD) {
@@ -236,7 +236,7 @@ public class SecurityTools {
                 ByteArrayOutputStream encryptedStream = new ByteArrayOutputStream();
                 try (FileInputStream fis = new FileInputStream(file);
                      CipherOutputStream cos = new CipherOutputStream(encryptedStream, cipher)) {
-                    byte[] buffer = new byte[128 * 1024];
+                    byte[] buffer = new byte[1024 * 1024];
                     int bytesRead;
                     while ((bytesRead = fis.read(buffer)) != -1) {
                         cos.write(buffer, 0, bytesRead);
