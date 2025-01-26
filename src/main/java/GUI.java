@@ -22,6 +22,7 @@ public class GUI extends JFrame implements Runnable{
     private final JButton backButton;
     protected static Dimension screenSize;
     GUI(){
+      DbHandler.setupDatabase();  
       run();
         JPanel backgroundPanel = new JPanel() {
             protected void paintComponent(Graphics g) {
