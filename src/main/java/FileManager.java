@@ -42,8 +42,10 @@ public class FileManager {
                                         JOptionPane.DEFAULT_OPTION,
                                         JOptionPane.QUESTION_MESSAGE, null, shs,
                                         shs[0]);
+                                        if(ch==JOptionPane.CLOSED_OPTION || ch == JOptionPane.CANCEL_OPTION){return;}
                                         SecurityTools.hashfile(file, feedbackArea, ch);
                                     break;    
+
                                     }
                     }
                 });
