@@ -10,7 +10,7 @@ public class BackupManager {
   
     static void saveFileToDatabase(JTextArea feedbackArea, File file) {
         if (file.length() > MAX_FILE_SIZE) {
-            feedbackArea.append("File exceeds the maximum allowed size of 1GB: " + file.getName() + "\n");
+            feedbackArea.append("File exceeds the maximum allowed size of 900MB: " + file.getName() + "\n");
             return;
         }
 
@@ -19,10 +19,13 @@ public class BackupManager {
             protected Void doInBackground() throws Exception {
                 try (Connection conn = DriverManager.getConnection(DB_URL);
                      PreparedStatement pstmt = conn.prepareStatement("INSERT INTO files (filename, filedata, username) VALUES (?, ?, ?)")) {
-
+                        byte[] fileData = new byte[(int) file.length()];
+                        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+                            bis.read(fileData);
+                        }
                     pstmt.setString(1, file.getName());
-                    pstmt.setBinaryStream(2, new BufferedInputStream(new FileInputStream(file)), file.length());
-                    pstmt.setString(3, GUI.loggedInUser);
+                    pstmt.setBytes(2, fileData);     
+                   pstmt.setString(3, GUI.loggedInUser);
                     pstmt.executeUpdate();
                 }
                 return null;
@@ -35,6 +38,7 @@ public class BackupManager {
                     feedbackArea.append("File saved to database: " + file.getName() + "\n");
                 } catch (Exception e) {
                     feedbackArea.append("Error saving file: " + e.getMessage() + "\n");
+                    e.printStackTrace();
                 }
             }
         };
@@ -70,25 +74,19 @@ public class BackupManager {
                     ResultSet rs = pstmt.executeQuery();
 
                     if (rs.next()) {
-                        try (InputStream inputStream = rs.getBinaryStream("filedata")) {
+                        byte[] filedata = rs.getBytes("filedata");
                             JFileChooser fileChooser = new JFileChooser();
                             fileChooser.setSelectedFile(new File(filename));
                             int result = fileChooser.showSaveDialog(obj);
-
                             if (result == JFileChooser.APPROVE_OPTION) {
                                 File saveFile = fileChooser.getSelectedFile();
                                 try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(saveFile))) {
-                                    byte[] buffer = new byte[BUFFER_SIZE];
-                                    int bytesRead;
-
-                                    while ((bytesRead = inputStream.read(buffer)) != -1) {
-                                        outputStream.write(buffer, 0, bytesRead);
-                                    }
+                                    outputStream.write(filedata);
                                 }
                                 feedbackArea.append("File retrieved and saved: " + saveFile.getName() + "\n");
                             }
                         }
-                    } else {
+                     else {
                         feedbackArea.append("File not found for the logged-in user.\n");
                     }
                 }
