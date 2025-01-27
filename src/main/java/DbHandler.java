@@ -5,7 +5,7 @@ import java.sql.*;
 public class DbHandler {
     static final String DB_URL = "jdbc:sqlite:unified.db";
     private static final String CREATE_USERDATA_TABLE_SQL = "CREATE TABLE IF NOT EXISTS userdata (id INTEGER PRIMARY KEY AUTOINCREMENT ,username TEXT NOT NULL UNIQUE , password TEXT NOT NULL, Last_Login TEXT)";
-    static final String CREATE_FILES_TABLE_SQL = "CREATE TABLE IF NOT EXISTS files(id INTEGER PRIMARY KEY AUTOINCREMENT,filename TEXT NOT NULL,filedata BLOB NOT NULL,username TEXT NOT NULL, isEncrypted BOOLEAN NOT NULL DEFAULT 0)";
+    static final String CREATE_FILES_TABLE_SQL = "CREATE TABLE IF NOT EXISTS files(id INTEGER PRIMARY KEY AUTOINCREMENT,filename TEXT NOT NULL,filedata BLOB NOT NULL,username TEXT NOT NULL, isEncrypted INTEGER NOT NULL DEFAULT 0)";
     static final String CREATE_KEYS_TABLE_SQL = "CREATE TABLE IF NOT EXISTS keys (keyId INTEGER PRIMARY KEY AUTOINCREMENT,id INTEGER, username TEXT NOT NULL , filename TEXT NOT NULL, key TEXT NOT NULL,FOREIGN KEY (id) REFERENCES files(id) ON DELETE CASCADE,FOREIGN KEY (username) REFERENCES userdata(username) ON DELETE CASCADE)";
 
     static void setupDatabase() {
@@ -16,7 +16,7 @@ public class DbHandler {
             stmt.execute(CREATE_USERDATA_TABLE_SQL);
             stmt.execute(CREATE_KEYS_TABLE_SQL);
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error setting up database: \n" + e.getMessage() + "\n");
+            JOptionPane.showMessageDialog(null,"Error setting up database: \n" + e.getMessage() + "\n");
         }
     }
 
