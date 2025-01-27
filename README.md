@@ -12,8 +12,10 @@
 ## Build :
 - Maven : ``mvn clean install``
 - JAR   : ``jar cfm SecureStorageManager.jar MANIFEST.MF -C target\classes\ . ``
-- Execute JAR   : ``java -jar SecureStorageManager.jar``
 - jdeps : ``java.base , java.desktop , java.sql``
 
+##Execute :
+- Maven : ``java -jar target/Secure_Storage_Manager-1.0-SNAPSHOT.jar``
+- JAR   : ``java -jar SecureStorageManager.jar``
 
 
