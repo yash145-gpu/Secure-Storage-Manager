@@ -85,12 +85,12 @@ public class GUI extends JFrame implements Runnable{
         }
         int ox=0,os=0;
       if(screenWidth > 1366) {os = 10; ox=80;};
-        label1 = new JLabel("  Secure Storage");
+        label1 = new JLabel("   Secure Storage");
         label1.setFont(new Font("Arial", Font.ITALIC, 64+os));
         label1.setForeground(Color.WHITE);
         label1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         label1.setBounds(18+ox, 10, 600, 80);
-        label2 = new JLabel("   Manager");
+        label2 = new JLabel("     Manager");
         label2.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         label2.setFont(new Font("ARIAL", Font.ITALIC, 64+os));
         label2.setForeground(Color.WHITE);
@@ -100,6 +100,23 @@ public class GUI extends JFrame implements Runnable{
         srl.setBounds(250+ox,360+ox+ox,200,170);
         srl.setForeground(Color.GRAY);
         srl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        JButton help = new JButton("<html><u>Help</u>");
+        help.setBorder(null);
+        help.setContentAreaFilled(false);
+        help.setFocusable(false);
+        help.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                help.setForeground(Color.CYAN);
+            }            
+            public void mouseExited(MouseEvent e) {
+                help.setForeground(Color.WHITE);
+            }
+        });
+        help.setBounds(screenWidth-125, screenHeight-150,100,100);
+        help.setFont(new Font("Arial",1,18));
+        help.setForeground(Color.WHITE);
+        help.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        backgroundPanel.add(help);
         backgroundPanel.add(srl);
         backgroundPanel.add(label2);
         backgroundPanel.add(label1);
@@ -194,6 +211,7 @@ public class GUI extends JFrame implements Runnable{
                 return;
             }
         });
+        help.addActionListener(e ->{JOptionPane.showMessageDialog(null,"Secure Storage Manager release 1.0.0 \n\n"+"AES 256 : Symmetric encryption of files with any extension type , files can be stored on database or local directory based on size.\n\n"+"SHA File Checksum : Generates SHA256/512 hash for a file.\n\n"+"File Database Backup : Encodes file data and stores directly on embedded database without encryption.\n\n"+"Admin login : For directly manipulating database with predefined tools (Single instance , id/password can be changed in source).\n\n"+"User login : Credentials are hashed and stored securely.\n\n");});
         Log.addActionListener(e -> {AuthenticationModule.loginUser(userField,passwdField,login, mainframe);AuthenticationModule.lastLogin(feedbackArea);});
         Reg.addActionListener(e -> UserManager.registerUser(userField,passwdField));
         enc.addActionListener(e -> SecurityTools.encryptFileToDatabase(feedbackArea,this));
@@ -229,6 +247,7 @@ public class GUI extends JFrame implements Runnable{
                 label2.setForeground(Color.CYAN);
                 srl.setVisible(true);
                 srl.setFont(new Font("Arial",Font.BOLD,20));
+               
             }
             @Override
             public void mouseExited(MouseEvent e) {
