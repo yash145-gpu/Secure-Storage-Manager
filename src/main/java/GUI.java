@@ -90,7 +90,7 @@ public class GUI extends JFrame implements Runnable{
         label1.setForeground(Color.WHITE);
         label1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         label1.setBounds(18+ox, 10, 600, 80);
-        label2 = new JLabel("     Manager");
+        label2 = new JLabel("    Manager");
         label2.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         label2.setFont(new Font("ARIAL", Font.ITALIC, 64+os));
         label2.setForeground(Color.WHITE);
