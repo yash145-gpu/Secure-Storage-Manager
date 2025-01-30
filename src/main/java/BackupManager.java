@@ -8,9 +8,9 @@ public class BackupManager {
     static final int BUFFER_SIZE = 8192; 
 
   
-    static void saveFileToDatabase(JTextArea feedbackArea, File file) {
+    static void saveFileToDatabase(File file) {
         if (file.length() > MAX_FILE_SIZE) {
-            feedbackArea.append("File exceeds the maximum allowed size of 900MB: " + file.getName() + "\n");
+            MainFrame.feedbackArea.append("File exceeds the maximum allowed size of 900MB: " + file.getName() + "\n");
             return;
         }
 
@@ -35,9 +35,9 @@ public class BackupManager {
             protected void done() {
                 try {
                     get();
-                    feedbackArea.append("File saved to database: " + file.getName() + "\n");
+                    MainFrame.feedbackArea.append("File saved to database: " + file.getName() + "\n");
                 } catch (Exception e) {
-                    feedbackArea.append("Error saving file: " + e.getMessage() + "\n");
+                    MainFrame.feedbackArea.append("Error saving file: " + e.getMessage() + "\n");
                     e.printStackTrace();
                 }
             }
@@ -46,20 +46,20 @@ public class BackupManager {
     }
 
     
-    static void saveFileToDatabase(JTextArea feedbackArea, GUI obj) {
+    static void saveFileToDatabase() {
         JFileChooser fileChooser = new JFileChooser();
-        int result = fileChooser.showOpenDialog(obj);
+        int result = fileChooser.showOpenDialog(null);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
-            saveFileToDatabase(feedbackArea, file);
+            saveFileToDatabase(file);
         }
     }
 
     
-    static void retrieveFileFromDatabase(JTextArea feedbackArea, GUI obj) {
-        String filename = JOptionPane.showInputDialog(obj, "Enter filename to retrieve:");
+    static void retrieveFileFromDatabase() {
+        String filename = JOptionPane.showInputDialog(null, "Enter filename to retrieve:");
         if (filename == null || filename.trim().isEmpty()) {
-            feedbackArea.append("Filename cannot be empty.\n");
+            MainFrame.feedbackArea.append("Filename cannot be empty.\n");
             return;
         }
 
@@ -77,17 +77,17 @@ public class BackupManager {
                         byte[] filedata = rs.getBytes("filedata");
                             JFileChooser fileChooser = new JFileChooser();
                             fileChooser.setSelectedFile(new File(filename));
-                            int result = fileChooser.showSaveDialog(obj);
+                            int result = fileChooser.showSaveDialog(null);
                             if (result == JFileChooser.APPROVE_OPTION) {
                                 File saveFile = fileChooser.getSelectedFile();
                                 try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(saveFile))) {
                                     outputStream.write(filedata);
                                 }
-                                feedbackArea.append("File retrieved and saved: " + saveFile.getName() + "\n");
+                                MainFrame.feedbackArea.append("File retrieved and saved: " + saveFile.getName() + "\n");
                             }
                         }
                      else {
-                        feedbackArea.append("File not found for the logged-in user.\n");
+                        MainFrame.feedbackArea.append("File not found for the logged-in user.\n");
                     }
                 }
                 return null;
@@ -98,7 +98,7 @@ public class BackupManager {
                 try {
                     get();
                 } catch (Exception e) {
-                    feedbackArea.append("Error retrieving file: " + e.getMessage() + "\n");
+                    MainFrame.feedbackArea.append("Error retrieving file: " + e.getMessage() + "\n");
                 }
             }
         };
