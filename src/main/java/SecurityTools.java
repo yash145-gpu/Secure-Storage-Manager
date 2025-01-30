@@ -13,10 +13,10 @@ import java.util.concurrent.Executors;
 public class SecurityTools {
    private static final ExecutorService executor = Executors.newFixedThreadPool(4);
     private static final String DB_URL = "jdbc:sqlite:unified.db";
-    static void encryptFileToDatabase(JTextArea feedbackArea, GUI obj) {
+    static void encryptFileToDatabase() {
         executor.submit(() -> {
         JFileChooser fileChooser = new JFileChooser();
-        int result = fileChooser.showOpenDialog(obj);
+        int result = fileChooser.showOpenDialog(null);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             float size = file.length();
@@ -29,10 +29,10 @@ public class SecurityTools {
             }
             if (size > 500 * 1024 * 1024) {
                 localD = true;
-                feedbackArea.append("Storing file locally");
+                MainFrame.feedbackArea.append("Storing file locally");
             }
             try {
-                feedbackArea.append("\n-> AES ENCRYPTION IN PROGRESS\n");
+                MainFrame.feedbackArea.append("\n-> AES ENCRYPTION IN PROGRESS\n");
                 KeyGenerator keyGen = KeyGenerator.getInstance("AES");
                 keyGen.init(256, new SecureRandom());
                 SecretKey secretKey = keyGen.generateKey();
@@ -41,7 +41,7 @@ public class SecurityTools {
                 Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
                 cipher.init(Cipher.ENCRYPT_MODE, secretKey);
                 if (localD) {
-                    localMode(file,cipher,feedbackArea,encodedKey);
+                    localMode(file,cipher,encodedKey);
                 }
 
                 ByteArrayOutputStream encryptedStream = new ByteArrayOutputStream();
@@ -77,17 +77,17 @@ public class SecurityTools {
                         keyStmt.setString(3, GUI.loggedInUser);
                         keyStmt.setString(4, encodedKey);
                         keyStmt.executeUpdate();
-                        feedbackArea.append("\nFile encrypted and saved to database with ID: " + fileId + "\n");
+                        MainFrame.feedbackArea.append("\nFile encrypted and saved to database with ID: " + fileId + "\n");
                     }
                 }
             } catch (Exception e) {
-                feedbackArea.append("\nError encrypting and saving file: " + e.getMessage() + "\n");
+                MainFrame.feedbackArea.append("\nError encrypting and saving file: " + e.getMessage() + "\n");
             }
         }
         });
     }
 
-    static void decryptFile(JTextArea feedbackArea, GUI obj) {
+    static void decryptFile() {
         executor.submit(() -> {
             int choice = JOptionPane.showConfirmDialog(
                     null,
@@ -96,7 +96,7 @@ public class SecurityTools {
                     JOptionPane.YES_NO_CANCEL_OPTION
             );
             if (choice == JOptionPane.CANCEL_OPTION || choice == JOptionPane.CLOSED_OPTION) {
-                feedbackArea.append("\nDecryption canceled by the user.\n");
+                MainFrame.feedbackArea.append("\nDecryption canceled by the user.\n");
                 return;
             }
             boolean fromLocal = (choice == JOptionPane.NO_OPTION);
@@ -106,19 +106,19 @@ public class SecurityTools {
 
                 if (fromLocal) {
                     JFileChooser fileChooser = new JFileChooser();
-                    int result = fileChooser.showOpenDialog(obj);
+                    int result = fileChooser.showOpenDialog(null);
                     if (result != JFileChooser.APPROVE_OPTION) {
-                        feedbackArea.append("\nNo file selected for decryption.\n");
+                        MainFrame.feedbackArea.append("\nNo file selected for decryption.\n");
                         return;
                     }
                     inputFile = fileChooser.getSelectedFile();
                     fileId = Integer.parseInt(JOptionPane.showInputDialog(
-                            obj,
+                            null,
                             "Enter the key ID for decryption:"
                     ));
                 } else {
                     fileId = Integer.parseInt(JOptionPane.showInputDialog(
-                            obj,
+                            null,
                             "Enter the file ID to decrypt:"
                     ));
                 }
@@ -143,11 +143,11 @@ public class SecurityTools {
                         boolean isEncrypted = fileRs.getBoolean("isEncrypted");
 
                         if (!isEncrypted) {
-                            feedbackArea.append("\nThe selected file is not encrypted.\n");
+                            MainFrame.feedbackArea.append("\nThe selected file is not encrypted.\n");
                             return;
                         }
                     } else {
-                        feedbackArea.append("\nFile not found for the logged-in user.\n");
+                        MainFrame.feedbackArea.append("\nFile not found for the logged-in user.\n");
                         return;
                     }
 
@@ -164,7 +164,7 @@ public class SecurityTools {
 
                         File saveFile = getSaveFile(filename);
                         if (saveFile == null) {
-                            feedbackArea.append("\nDecryption canceled.\n");
+                            MainFrame.feedbackArea.append("\nDecryption canceled.\n");
                             return;
                         }
                         try (CipherInputStream cis = new CipherInputStream(encryptedStream, cipher);
@@ -177,13 +177,13 @@ public class SecurityTools {
                             }
                         }
 
-                        feedbackArea.append("\nFile decrypted and saved: " + saveFile.getAbsolutePath() + "\n");
+                        MainFrame.feedbackArea.append("\nFile decrypted and saved: " + saveFile.getAbsolutePath() + "\n");
                     } else {
-                        feedbackArea.append("\nKey not found for the selected file.\n");
+                        MainFrame.feedbackArea.append("\nKey not found for the selected file.\n");
                     }
                 }
             } catch (Exception e) {
-                feedbackArea.append("\nError decrypting file: " + e.getMessage() + "\n");
+                MainFrame.feedbackArea.append("\nError decrypting file: " + e.getMessage() + "\n");
             }
         });
     }
@@ -198,7 +198,7 @@ public class SecurityTools {
         return null;
     }
 
-    static void encryptFileToDatabase(JTextArea feedbackArea, File file) {
+    static void encryptFileToDatabase(File file) {
         executor.submit(() -> {
             float sizeMB = file.length() / (1024 * 1024);
             boolean localD = false;
@@ -215,11 +215,11 @@ public class SecurityTools {
 
             if (sizeMB > 500) {
                 localD = true;
-                feedbackArea.append("-> Storing file locally due to size.\n");
+                MainFrame.feedbackArea.append("-> Storing file locally due to size.\n");
             }
 
             try {
-                feedbackArea.append("\n-> AES ENCRYPTION IN PROGRESS\n");
+                MainFrame.feedbackArea.append("\n-> AES ENCRYPTION IN PROGRESS\n");
 
                 KeyGenerator keyGen = KeyGenerator.getInstance("AES");
                 keyGen.init(256, new SecureRandom());
@@ -230,7 +230,7 @@ public class SecurityTools {
                 cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 
                 if (localD) {
-                localMode(file,cipher,feedbackArea,encodedKey);
+                localMode(file,cipher,encodedKey);
                 }
 
                 ByteArrayOutputStream encryptedStream = new ByteArrayOutputStream();
@@ -265,11 +265,11 @@ public class SecurityTools {
                         keyStmt.setString(3, GUI.loggedInUser);
                         keyStmt.setString(4, encodedKey);
                         keyStmt.executeUpdate();
-                        feedbackArea.append("\nFile encrypted and saved to database with ID: " + fileId + "\n");
+                        MainFrame.feedbackArea.append("\nFile encrypted and saved to database with ID: " + fileId + "\n");
                     }
                 }
             } catch (Exception e) {
-                feedbackArea.append("\nError encrypting and saving file: " + e.getMessage() + "\n");
+                MainFrame.feedbackArea.append("\nError encrypting and saving file: " + e.getMessage() + "\n");
             }
         });
     }
@@ -290,10 +290,10 @@ public class SecurityTools {
         }
         return localFile;
     }
-    private static void  localMode(File file,Cipher cipher,JTextArea feedbackArea,String encodedKey){
+    private static void  localMode(File file,Cipher cipher,String encodedKey){
         try {
             File localFile = getLocalFile(file, cipher);
-            feedbackArea.append("<- File saved locally at: " + localFile.getAbsolutePath() + "\n");
+            MainFrame.feedbackArea.append("<- File saved locally at: " + localFile.getAbsolutePath() + "\n");
             try (Connection conn = DriverManager.getConnection(DB_URL);
                  PreparedStatement fileStmt = conn.prepareStatement(
                          "INSERT INTO files (filename, filedata, username, isEncrypted) VALUES (?,?, ?, ?)");
@@ -318,7 +318,7 @@ public class SecurityTools {
         return;
     }
 
-    protected static void hashfile(File file, JTextArea feedbackArea, int mode) {
+    protected static void hashfile(File file, int mode) {
         executor.submit(() -> {
             String Algo = "SHA-256";
             if (mode == 1) {
@@ -343,7 +343,7 @@ public class SecurityTools {
                     }
                     hexString.append(hex);
                 }
-                feedbackArea.setText("\n" + Algo + " Hash: " + hexString.toString() + "\n");
+                MainFrame.feedbackArea.setText("\n" + Algo + " Hash: " + hexString.toString() + "\n");
                 return hexString.toString();
 
             } catch (NoSuchAlgorithmException e) {
