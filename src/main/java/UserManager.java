@@ -31,6 +31,7 @@ class UserManager {
             JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
 
         }
+       
     }
     protected static String hashPassword(String password) {
         try {
@@ -47,9 +48,6 @@ class UserManager {
         }
     }
 private static boolean userNameAlreadyExists(String username){
-        if(username.equals("admin")){
-            return true;
-        }
 
     try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL);
          PreparedStatement pstmt = conn.prepareStatement("SELECT 1 from userdata where username=?")) {
