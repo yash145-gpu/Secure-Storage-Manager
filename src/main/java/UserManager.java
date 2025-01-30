@@ -44,17 +44,14 @@ class UserManager {
             return null;
         }
     }
-private static boolean userNameAlreadyExists(String username){
+protected static boolean userNameAlreadyExists(String username){
 
     try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL);
          PreparedStatement pstmt = conn.prepareStatement("SELECT 1 from userdata where username=?")) {
         pstmt.setString(1, username);
         try (ResultSet rs = pstmt.executeQuery()) {
             return rs.next();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
-
-        }
+        } 
     } catch (SQLException e) {
         JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
 
