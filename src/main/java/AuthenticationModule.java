@@ -3,63 +3,96 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class AuthenticationModule{
+public class AuthenticationModule {
+    private static String typequery;
 
-    static void loginUser(JTextField usernameField , JPasswordField passwordField,JFrame logi , JFrame bod) {
-        String username = usernameField.getText().trim();
-        String password = new String(passwordField.getPassword()).trim();
+    static void loginUser(int adm) {
+        String username = GUI.userField.getText().trim();
+        String password = new String(GUI.passwdField.getPassword()).trim();
 
         if (username.isEmpty() || password.isEmpty()) {
 
-            JOptionPane.showMessageDialog(null,"Fields cannot be empty");
+            JOptionPane.showMessageDialog(null, "Fields cannot be empty");
             return;
         }
-        if (username.equals("admin") && password.equals("admin")) {
-            AdminTools ad = new AdminTools();
-            logi.setVisible(false);
-            return;
+        if (adm == 0) {
+            typequery = "SELECT * FROM userdata WHERE username = ? AND password = ?";
+        } else {
+            typequery = "SELECT * FROM Admindata WHERE AdminName = ? AND password = ?";
+
         }
         try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM userdata WHERE username = ? AND password = ?")) {
+                PreparedStatement pstmt = conn.prepareStatement(typequery)) {
             pstmt.setString(1, username);
             pstmt.setString(2, UserManager.hashPassword(password));
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                GUI.loggedInUser = username;
-                logi.setVisible(false);
-                bod.setTitle("Welcome "+GUI.loggedInUser);
-                bod.setVisible(true);
+                if (adm == 0) {
+                    GUI.loggedInUser = username;
+                    GUI.login.setVisible(false);
+                    MainFrame mf = new MainFrame();
+                    MainFrame.mainframe.setTitle("Welcome " + GUI.loggedInUser);
+                    MainFrame.mainframe.setVisible(true);
 
+                } else if (adm == 1) {
+                    AdminTools adminSession = new AdminTools();
+                    GUI.login.setVisible(false);
+
+                }
             } else {
-                JOptionPane.showMessageDialog(null,"Invalid username or password");
+                JOptionPane.showMessageDialog(null, "Invalid username or password");
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
+            JOptionPane.showMessageDialog(null, "Error logging in: " + e.getMessage() + "\n");
         }
     }
-    public static void lastLogin(JTextArea feedbackArea) {
+
+    public static void lastLogin(int user) {
+        String selectQuery;
+        String updateQuery;
+        String name = GUI.userField.getText();
+        String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        if (user == 1) {
+            selectQuery = "SELECT Last_Login FROM Admindata WHERE AdminName = ?";
+            updateQuery = "UPDATE Admindata SET Last_Login = ? WHERE AdminName = ?";
+        } else {
+            selectQuery = "SELECT Last_Login FROM userdata WHERE username = ?";
+            updateQuery = "UPDATE userdata SET Last_Login = ? WHERE username = ?";
+        }
+
         try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL)) {
-            if (conn != null) {
-                String selectQuery = "SELECT Last_Login FROM userdata WHERE username = ?";
-                try (PreparedStatement pstmt = conn.prepareStatement(selectQuery)) {
-                    pstmt.setString(1, GUI.loggedInUser);
-                    ResultSet rs = pstmt.executeQuery();
+            conn.setAutoCommit(false);
+
+            String lastLogin = null;
+            try (PreparedStatement pstmt = conn.prepareStatement(selectQuery)) {
+                pstmt.setString(1, name);
+                try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
-                        String lastLogin = rs.getString("Last_Login");
-                       feedbackArea.setText("Welcome  " +GUI.loggedInUser+ (lastLogin != null ? "  Last login : "+lastLogin : " this is your First login"));
-                    } 
-                }
-                String updateQuery = "UPDATE userdata SET Last_Login = ? WHERE username = ?";
-                try (PreparedStatement ustmt = conn.prepareStatement(updateQuery)) {
-                    String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                    ustmt.setString(1, currentTime);
-                    ustmt.setString(2, GUI.loggedInUser);
-                    ustmt.executeUpdate();
+                        lastLogin = rs.getString("Last_Login");
+                        rs.close();
+                    }
                 }
             }
+
+            if (user == 0) {
+                MainFrame.feedbackArea.setText("Welcome " + name
+                        + (lastLogin != null ? "  Last login : " + lastLogin : " this is your First login"));
+            } else {
+                AdminTools.feedbackArea.setText("Welcome Administrator " + name
+                        + (lastLogin != null ? "  Last login : " + lastLogin : " this is your First login"));
+            }
+
+            try (PreparedStatement ustmt = conn.prepareStatement(updateQuery)) {
+                ustmt.setString(1, currentTime);
+                ustmt.setString(2, name);
+                ustmt.executeUpdate();
+            }
+
+            conn.commit();
         } catch (SQLException e) {
             System.out.println("Database error: " + e.getMessage());
         }
     }
+
 }
