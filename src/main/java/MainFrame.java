@@ -1,17 +1,23 @@
-import java.awt.BorderLayout;
 import java.awt.*;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Objects;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 public class MainFrame {
@@ -66,6 +72,7 @@ public class MainFrame {
         JButton rm_file = new JButton("Remove Files");
         JButton SHA2 = new JButton("SHA-256 File Checksum");
         JButton vk = new JButton("View Keys");
+        JButton reset = new JButton("Reset username or password");
         vk.addActionListener(e -> DbHandler.executeSQLQuery(feedbackArea,"SELECT* FROM KEYS",tableModel));
         fileButtonPanel.add(SHA2);
         fileButtonPanel.add(SHA5);
@@ -74,6 +81,7 @@ public class MainFrame {
         fileButtonPanel.add(enc);
         fileButtonPanel.add(dec);
         fileButtonPanel.add(rm_file);
+        fileButtonPanel.add(reset);
         fileButtonPanel.add(saveFileButton);
         fileButtonPanel.add(retrieveFileButton);
         for (Component component : fileButtonPanel.getComponents()) {
@@ -127,5 +135,73 @@ public class MainFrame {
                 SecurityTools.hashfile(file,1);}});
         saveFileButton.addActionListener(e ->BackupManager.saveFileToDatabase());
         retrieveFileButton.addActionListener(e ->BackupManager.retrieveFileFromDatabase());
+         reset.addActionListener(e -> {
+            JFrame tmp = new JFrame("Update Credentials");
+            tmp.setLayout(new GridLayout(5, 1));
+            tmp.setSize(600, 500);
+            tmp.setVisible(true);
+            JLabel lon = new JLabel("Current Name");
+            JTextField ct = new JTextField("current name");
+            JLabel lnn = new JLabel("New Name");
+            JTextField nt = new JTextField("new name");
+            JLabel lop = new JLabel("Current Password");
+            JTextField opt = new JTextField("old Password");
+            JLabel lnp = new JLabel("New Password");
+            JTextField npt = new JTextField("New Password");
+            JButton updt = new JButton("Update");
+            tmp.add(lon);
+            tmp.add(ct);
+            tmp.add(lnn);
+            tmp.add(nt);
+            tmp.add(lop);
+            tmp.add(opt);
+            tmp.add(lnp);
+            tmp.add(npt);
+            tmp.add(updt);
+
+            updt.addActionListener(ee -> {
+                String ctt = ct.getText();
+                String cpp = opt.getText();
+                String cnn = nt.getText();
+                String ppnt = npt.getText();
+                changeUserCredentials(ctt, cpp, cnn, ppnt);
+            });
+        });
+    }
+    public static void changeUserCredentials(String currentName, String currentPassword, String newName,String newPassword) {
+if(UserManager.userNameAlreadyExists(newName)){
+    JOptionPane.showMessageDialog(null, "Username already exists.");
+    return;
+}
+        currentPassword = UserManager.hashPassword(currentPassword);
+        newPassword = UserManager.hashPassword(newPassword);
+        try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL)) {
+
+            String validateQuery = "SELECT * FROM Userdata WHERE username = ? AND password = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(validateQuery)) {
+                pstmt.setString(1, currentName);
+                pstmt.setString(2, currentPassword);
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    String updateQuery = "UPDATE userdata SET username = ?, password = ? WHERE username = ?";
+                    try (PreparedStatement updatePstmt = conn.prepareStatement(updateQuery)) {
+                        updatePstmt.setString(1, newName);
+                        updatePstmt.setString(2, newPassword);
+                        updatePstmt.setString(3, currentName);
+
+                        int rowsAffected = updatePstmt.executeUpdate();
+                        if (rowsAffected > 0) {
+                            JOptionPane.showMessageDialog(null, "Credentials updated successfully.");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Failed to update credentials.");
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Invalid current credentials.");
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
+        }
     }
 }
