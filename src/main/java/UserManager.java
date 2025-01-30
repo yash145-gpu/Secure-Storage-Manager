@@ -4,7 +4,6 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 
 class UserManager {
-
     protected static void registerUser(JTextField usernameField, JPasswordField passwordField) {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
@@ -29,9 +28,7 @@ class UserManager {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
-
         }
-       
     }
     protected static String hashPassword(String password) {
         try {
