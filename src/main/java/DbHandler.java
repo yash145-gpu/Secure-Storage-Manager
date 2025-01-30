@@ -3,23 +3,48 @@ import javax.swing.table.DefaultTableModel;
 import java.sql.*;
 
 public class DbHandler {
-    static final String DB_URL = "jdbc:sqlite:unified.db";
+    protected static final String DB_URL = "jdbc:sqlite:unified.db";
     private static final String CREATE_USERDATA_TABLE_SQL = "CREATE TABLE IF NOT EXISTS userdata (id INTEGER PRIMARY KEY AUTOINCREMENT ,username TEXT NOT NULL UNIQUE , password TEXT NOT NULL, Last_Login TEXT)";
-    static final String CREATE_FILES_TABLE_SQL = "CREATE TABLE IF NOT EXISTS files(id INTEGER PRIMARY KEY AUTOINCREMENT,filename TEXT NOT NULL,filedata BLOB NOT NULL,username TEXT NOT NULL, isEncrypted INTEGER NOT NULL DEFAULT 0)";
-    static final String CREATE_KEYS_TABLE_SQL = "CREATE TABLE IF NOT EXISTS keys (keyId INTEGER PRIMARY KEY AUTOINCREMENT,id INTEGER, username TEXT NOT NULL , filename TEXT NOT NULL, key TEXT NOT NULL,FOREIGN KEY (id) REFERENCES files(id) ON DELETE CASCADE,FOREIGN KEY (username) REFERENCES userdata(username) ON DELETE CASCADE)";
-
+    private static final String CREATE_FILES_TABLE_SQL = "CREATE TABLE IF NOT EXISTS files(id INTEGER PRIMARY KEY AUTOINCREMENT,filename TEXT NOT NULL,filedata BLOB NOT NULL,username TEXT NOT NULL, isEncrypted INTEGER NOT NULL DEFAULT 0)";
+    private static final String CREATE_KEYS_TABLE_SQL = "CREATE TABLE IF NOT EXISTS keys (keyId INTEGER PRIMARY KEY AUTOINCREMENT,id INTEGER, username TEXT NOT NULL , filename TEXT NOT NULL, key TEXT NOT NULL,FOREIGN KEY (id) REFERENCES files(id) ON DELETE CASCADE,FOREIGN KEY (username) REFERENCES userdata(username) ON DELETE CASCADE)";
+    private static final String CREATE_ADMIN_DATA_TABLE_SQL = "CREATE TABLE IF NOT EXISTS Admindata (id INTEGER PRIMARY KEY AUTOINCREMENT ,AdminName TEXT NOT NULL UNIQUE , password TEXT NOT NULL, Last_Login TEXT)";
     static void setupDatabase() {
+     
         try (Connection conn = DriverManager.getConnection(DB_URL);
                 Statement stmt = conn.createStatement()) {
             stmt.execute("PRAGMA foreign_keys = ON");
             stmt.execute(CREATE_FILES_TABLE_SQL);
             stmt.execute(CREATE_USERDATA_TABLE_SQL);
             stmt.execute(CREATE_KEYS_TABLE_SQL);
+            stmt.execute(CREATE_ADMIN_DATA_TABLE_SQL);
+            AdminInit();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null,"Error setting up database: \n" + e.getMessage() + "\n");
         }
     }
-
+static void AdminInit(){
+    String initAdm = UserManager.hashPassword("Admin");
+    String checkAdminSQL = "SELECT COUNT(*) FROM Admindata";
+    try (Connection conn = DriverManager.getConnection(DB_URL); PreparedStatement pstmtCheck = conn.prepareStatement(checkAdminSQL)) { 
+        ResultSet rs = pstmtCheck.executeQuery();
+    if(rs.next()){
+        if (rs.getInt(1) == 0) {
+            String insertAdminSQL = "INSERT INTO Admindata (AdminName, password) VALUES (?, ?)";
+            try (PreparedStatement pstmtInsert = conn.prepareStatement(insertAdminSQL)) {
+                pstmtInsert.setString(1, "Admin");  
+                pstmtInsert.setString(2, initAdm); 
+                pstmtInsert.executeUpdate(); 
+            }
+        } else {
+            return;
+        }
+    }
+    }
+ catch (SQLException e) {
+    JOptionPane.showMessageDialog(null, "Error setting up database: \n" + e.getMessage() + "\n");
+}
+  
+}
     static void executeSQLQuery(JTextArea feedbackArea, String query, DefaultTableModel tableModel) {
 
         if (query.isEmpty()) {
