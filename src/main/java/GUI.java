@@ -1,26 +1,21 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Objects;
 public class GUI extends JFrame implements Runnable{
-    protected static JFrame login, mainframe;
+    protected static JFrame login;
     private static BufferedImage img;
     protected static String loggedInUser;
     private final JLabel label1,label2,srl;
-    private final DefaultTableModel tableModel;
-    protected final JTextArea feedbackArea;
-    private final JComboBox<File> driveComboBox;
-    private final JPanel filePanel;
-    private final JButton backButton;
     protected static Dimension screenSize;
+    protected static JPasswordField passwdField;
+    protected static JTextField userField;
+    protected static ImageIcon imz;
     GUI(){
       DbHandler.setupDatabase();  
       run();
@@ -34,8 +29,8 @@ public class GUI extends JFrame implements Runnable{
         int screenWidth = screenSize.width;
         int screenHeight = screenSize.height;
         int sw = screenWidth - 620;
-        int sh = screenHeight - 654;
-        ImageIcon imz = new ImageIcon(getClass().getResource("ism.png"));
+        int sh = screenHeight - 680;
+        imz = new ImageIcon(getClass().getResource("ism.png"));
         login = new JFrame("Login");
         login.setIconImage(imz.getImage());
         login.setLayout(new BorderLayout());
@@ -49,7 +44,7 @@ public class GUI extends JFrame implements Runnable{
         label3.setForeground(Color.WHITE);
         label3.setBounds(sw, sh, 300, 50);
         backgroundPanel.add(label3);
-        JTextField userField = new JTextField();
+        userField = new JTextField();
         userField.setBounds(sw, sh+70, 320, 40);
         backgroundPanel.add(userField);
 
@@ -58,7 +53,7 @@ public class GUI extends JFrame implements Runnable{
         label4.setForeground(Color.WHITE);
         label4.setBounds(sw, sh+150, 300, 50);
 
-        JPasswordField passwdField = new JPasswordField();
+        passwdField = new JPasswordField();
         passwdField.setBounds(sw, sh+230, 320, 40);
         backgroundPanel.add(passwdField);
         backgroundPanel.add(label4);
@@ -69,6 +64,16 @@ public class GUI extends JFrame implements Runnable{
         Log.setContentAreaFilled(false);
         Log.setFocusable(false);
         backgroundPanel.add(Log);
+
+       
+        JButton Admlog = new JButton("Login as Administrator");
+        Admlog.setFont(new Font("Arial", Font.ITALIC,17));
+        Admlog.setBounds(sw, sh+400, 320, 40);
+        Admlog.setForeground(Color.WHITE);
+        Admlog.setContentAreaFilled(false);
+        Admlog.setFocusable(false);
+        backgroundPanel.add(Admlog);
+
         JButton Reg = new JButton();
         Reg.setFont(new Font("Arial", Font.ITALIC,17));
         Reg.setBounds(sw+160, sh+320, 160, 40);
@@ -123,113 +128,11 @@ public class GUI extends JFrame implements Runnable{
         backgroundPanel.add(yp);
         login.add(backgroundPanel, BorderLayout.CENTER);
         login.setVisible(true);
-        feedbackArea = new JTextArea(5, 40);
-        feedbackArea.setFont(new Font("Arial",0,16));
-        feedbackArea.setEditable(false);
-        JScrollPane feedbackScrollPane = new JScrollPane(feedbackArea);
-        JPanel Menu = new JPanel(new BorderLayout());
-        JPanel topPanel = new JPanel(new BorderLayout());
-        driveComboBox = new JComboBox<>(File.listRoots());
-        backButton = new JButton("Back");
-        topPanel.add(driveComboBox, BorderLayout.WEST);
-        topPanel.add(backButton, BorderLayout.EAST);
-        Menu.add(topPanel, BorderLayout.NORTH);
-        filePanel = new JPanel();
-        filePanel.setLayout(new BoxLayout(filePanel, BoxLayout.Y_AXIS));
-        JScrollPane scrollPane = new JScrollPane(filePanel);
-        scrollPane.setPreferredSize(new Dimension(200,1000));
-        Menu.add(scrollPane, BorderLayout.CENTER);
-        driveComboBox.addActionListener(e -> FileManager.listFiles((File)(Objects.requireNonNull(driveComboBox.getSelectedItem())),filePanel,backButton,feedbackArea,this));
-        driveComboBox.setSelectedIndex(0);
-        backButton.addActionListener(e -> FileManager.navigateBack(filePanel,backButton,feedbackArea,this));
-
-        mainframe = new JFrame();
-        mainframe.setIconImage(imz.getImage());
-        mainframe.setLayout(new BorderLayout());
-        mainframe.setSize(screenWidth, screenHeight);
-        mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainframe.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        JPanel bp = new JPanel();
-        bp.setLayout(new BorderLayout());
-
-        JPanel fileButtonPanel = new JPanel();
-        fileButtonPanel.setPreferredSize(new Dimension(200,1000));
-        JButton saveFileButton = new JButton("Save File to DB");
-        JButton SHA5 = new JButton("SHA-512 Checksum");
-        JButton retrieveFileButton = new JButton("Retrieve File from DB");
-
-        tableModel = new DefaultTableModel();
-        JTable resultTable = new JTable(tableModel);
-        JButton enc = new JButton("AES File Encryption");
-        JButton dec = new JButton("AES File Decryption");
-        JButton vf = new JButton("View Files");
-        JButton rm_file = new JButton("Remove Files");
-        JButton SHA2 = new JButton("SHA-256 File Checksum");
-        JButton vk = new JButton("View Keys");
-        vk.addActionListener(e -> DbHandler.executeSQLQuery(feedbackArea,"SELECT* FROM KEYS",tableModel));
-        fileButtonPanel.add(SHA2);
-        fileButtonPanel.add(SHA5);
-        fileButtonPanel.add(vf);
-        fileButtonPanel.add(vk);
-        fileButtonPanel.add(enc);
-        fileButtonPanel.add(dec);
-        fileButtonPanel.add(rm_file);
-        fileButtonPanel.add(saveFileButton);
-        fileButtonPanel.add(retrieveFileButton);
-        for (Component component : fileButtonPanel.getComponents()) {
-                component.setBackground(Color.GRAY);
-                component.setPreferredSize(new Dimension(200,66));
-                component.setFocusable(false);
-        }
-        JScrollPane tableScrollPane = new JScrollPane(resultTable);
-        feedbackScrollPane.setPreferredSize(new Dimension(600,500));
-        feedbackScrollPane.setBackground(Color.GRAY);
-        Menu.add(fileButtonPanel,BorderLayout.WEST);
-        bp.add(feedbackScrollPane,BorderLayout.EAST);
-        bp.add(Menu,BorderLayout.WEST);
-        bp.add(tableScrollPane,BorderLayout.CENTER);
-        JButton Logout= new JButton("Logout");
-        Logout.addActionListener(e-> {
-            feedbackArea.setText(" ");
-            mainframe.dispose(); login.setVisible(true);});
-            bp.add(Logout,BorderLayout.SOUTH);
-            
-        mainframe.add(bp);
-
-        rm_file.addActionListener( e -> {
-            String[] op = {"ID","Name"};
-            int choice = JOptionPane.showOptionDialog(this,"Enter file to delete","Delete mode",JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null,op,op[0]);
-            if(choice == 0){
-                int id = Integer.parseInt(JOptionPane.showInputDialog("Enter file ID"));
-                DbHandler.deletefile(feedbackArea,null,id);
-            }
-            else if(choice==1){
-                String fs = JOptionPane.showInputDialog("Enter File name");
-                DbHandler.deletefile(feedbackArea, fs,0);
-            }
-            else{
-                return;
-            }
-        });
+      
         help.addActionListener(e ->{JOptionPane.showMessageDialog(null,"Secure Storage Manager release 1.0.0 \n\n"+"AES 256 : Symmetric encryption of files with any extension type , files can be stored on database or local directory based on size.\n\n"+"SHA File Checksum : Generates SHA256/512 hash for a file.\n\n"+"File Database Backup : Encodes file data and stores directly on embedded database without encryption.\n\n"+"Admin login : For directly manipulating database with predefined tools (Single instance , id/password can be changed in source).\n\n"+"User login : Credentials are hashed and stored securely.\n\n");});
-        Log.addActionListener(e -> {AuthenticationModule.loginUser(userField,passwdField,login, mainframe);AuthenticationModule.lastLogin(feedbackArea);});
+        Log.addActionListener(e -> {AuthenticationModule.loginUser(0);AuthenticationModule.lastLogin(0);});
+        Admlog.addActionListener(e -> {AuthenticationModule.loginUser(1); AuthenticationModule.lastLogin(1);});
         Reg.addActionListener(e -> UserManager.registerUser(userField,passwdField));
-        enc.addActionListener(e -> SecurityTools.encryptFileToDatabase(feedbackArea,this));
-        dec.addActionListener(e -> SecurityTools.decryptFile(feedbackArea,this));
-        vf.addActionListener(e -> {  String query = "select * from files where username= "+"'"+loggedInUser+"'"; DbHandler.executeSQLQuery(feedbackArea,query,tableModel);});
-        SHA2.addActionListener(e -> {    JFileChooser fileChooser = new JFileChooser();
-            int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                File file = fileChooser.getSelectedFile();
-                SecurityTools.hashfile(file,feedbackArea,0);}});
-        SHA5.addActionListener(e -> {    JFileChooser fileChooser = new JFileChooser();
-            int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                File file = fileChooser.getSelectedFile();
-                SecurityTools.hashfile(file,feedbackArea,1);}});
-        saveFileButton.addActionListener(e ->BackupManager.saveFileToDatabase(feedbackArea,this));
-        retrieveFileButton.addActionListener(e ->BackupManager.retrieveFileFromDatabase(feedbackArea,this));
-
     }
 
     private JButton getButton() {
