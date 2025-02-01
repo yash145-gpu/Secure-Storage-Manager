@@ -10,7 +10,7 @@ public class BackupManager {
   
     static void saveFileToDatabase(File file) {
         if (file.length() > MAX_FILE_SIZE) {
-            MainFrame.feedbackArea.append("File exceeds the maximum allowed size of 900MB: " + file.getName() + "\n");
+            MainFrame.feedbackArea.append("\nFile exceeds the maximum allowed size of 900MB: " + file.getName() + "\n");
             return;
         }
 
@@ -35,9 +35,9 @@ public class BackupManager {
             protected void done() {
                 try {
                     get();
-                    MainFrame.feedbackArea.append("File saved to database: " + file.getName() + "\n");
+                    MainFrame.feedbackArea.append("\nFile saved to database: " + file.getName() + "\n");
                 } catch (Exception e) {
-                    MainFrame.feedbackArea.append("Error saving file: " + e.getMessage() + "\n");
+                    MainFrame.feedbackArea.append("\nError saving file: " + e.getMessage() + "\n");
                     e.printStackTrace();
                 }
             }
@@ -59,7 +59,7 @@ public class BackupManager {
     static void retrieveFileFromDatabase() {
         String filename = JOptionPane.showInputDialog(null, "Enter filename to retrieve:");
         if (filename == null || filename.trim().isEmpty()) {
-            MainFrame.feedbackArea.append("Filename cannot be empty.\n");
+            MainFrame.feedbackArea.append("\nFilename cannot be empty.\n");
             return;
         }
 
@@ -83,11 +83,11 @@ public class BackupManager {
                                 try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(saveFile))) {
                                     outputStream.write(filedata);
                                 }
-                                MainFrame.feedbackArea.append("File retrieved and saved: " + saveFile.getName() + "\n");
+                                MainFrame.feedbackArea.append("\nFile retrieved and saved: " + saveFile.getName() + "\n");
                             }
                         }
                      else {
-                        MainFrame.feedbackArea.append("File not found for the logged-in user.\n");
+                        MainFrame.feedbackArea.append("\nFile not found for the logged-in user.\n");
                     }
                 }
                 return null;
@@ -98,7 +98,7 @@ public class BackupManager {
                 try {
                     get();
                 } catch (Exception e) {
-                    MainFrame.feedbackArea.append("Error retrieving file: " + e.getMessage() + "\n");
+                    MainFrame.feedbackArea.append("\nError retrieving file: " + e.getMessage() + "\n");
                 }
             }
         };
