@@ -1,4 +1,5 @@
 import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
 import java.io.*;
@@ -29,7 +30,7 @@ public class SecurityTools {
             }
             if (size > 500 * 1024 * 1024) {
                 localD = true;
-                MainFrame.feedbackArea.append("Storing file locally");
+                MainFrame.feedbackArea.append("\nStoring file locally");
             }
             try {
                 MainFrame.feedbackArea.append("\n-> AES ENCRYPTION IN PROGRESS\n");
@@ -37,13 +38,15 @@ public class SecurityTools {
                 keyGen.init(256, new SecureRandom());
                 SecretKey secretKey = keyGen.generateKey();
                 String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
-
                 Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-                cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+                 byte[] iv = new byte[16];  
+                new SecureRandom().nextBytes(iv);  
+                IvParameterSpec ivSpec = new IvParameterSpec(iv);
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey,ivSpec);
                 if (localD) {
-                    localMode(file,cipher,encodedKey);
+                    localMode(file,cipher,encodedKey,iv);
+                    return;
                 }
-
                 ByteArrayOutputStream encryptedStream = new ByteArrayOutputStream();
                 try (FileInputStream fis = new FileInputStream(file);
                      CipherOutputStream cos = new CipherOutputStream(encryptedStream, cipher)) {
@@ -54,7 +57,6 @@ public class SecurityTools {
                         cos.write(buffer, 0, bytesRead);
                     }
                 }
-
                 byte[] encryptedData = encryptedStream.toByteArray();
 
                 try (Connection conn = DriverManager.getConnection(DB_URL);
@@ -62,7 +64,7 @@ public class SecurityTools {
                              "INSERT INTO files (filename, filedata, username, isEncrypted) VALUES (?, ?, ?, ?)",
                              PreparedStatement.RETURN_GENERATED_KEYS);
                      PreparedStatement keyStmt = conn.prepareStatement(
-                             "INSERT INTO keys (id, filename, username, key) VALUES (?, ?, ?, ?)")) {
+                             "INSERT INTO keys (id, filename, username, key, IniVec) VALUES (?, ?, ?, ?, ?)")) {
                     fileStmt.setString(1, file.getName());
                     fileStmt.setBytes(2, encryptedData);
                     fileStmt.setString(3, GUI.loggedInUser);
@@ -76,6 +78,7 @@ public class SecurityTools {
                         keyStmt.setString(2, file.getName());
                         keyStmt.setString(3, GUI.loggedInUser);
                         keyStmt.setString(4, encodedKey);
+                        keyStmt.setBytes(5, iv);
                         keyStmt.executeUpdate();
                         MainFrame.feedbackArea.append("\nFile encrypted and saved to database with ID: " + fileId + "\n");
                     }
@@ -105,7 +108,7 @@ public class SecurityTools {
                 File inputFile = null;
 
                 if (fromLocal) {
-                    JFileChooser fileChooser = new JFileChooser();
+                    JFileChooser fileChooser = new JFileChooser("local\\"+GUI.loggedInUser+"\\");
                     int result = fileChooser.showOpenDialog(null);
                     if (result != JFileChooser.APPROVE_OPTION) {
                         MainFrame.feedbackArea.append("\nNo file selected for decryption.\n");
@@ -126,7 +129,7 @@ public class SecurityTools {
                      PreparedStatement fileStmt = conn.prepareStatement(
                              "SELECT filedata, filename, isEncrypted FROM files WHERE id = ? AND username = ?");
                      PreparedStatement keyStmt = conn.prepareStatement(
-                             "SELECT key FROM keys WHERE id = ? AND username = ?")) {
+                             "SELECT key,IniVec FROM keys WHERE id = ? AND username = ?")) {
                     fileStmt.setInt(1, fileId);
                     fileStmt.setString(2, GUI.loggedInUser);
                     ResultSet fileRs = fileStmt.executeQuery();
@@ -158,9 +161,11 @@ public class SecurityTools {
                     if (keyRs.next()) {
                         String encodedKey = keyRs.getString("key");
                         byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+                        byte[] iv = keyRs.getBytes("IniVec");
+                        IvParameterSpec ivspec = new IvParameterSpec(iv);
                         SecretKey secretKey = new SecretKeySpec(decodedKey, "AES");
-                        Cipher cipher = Cipher.getInstance("AES");
-                        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+                        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                        cipher.init(Cipher.DECRYPT_MODE, secretKey,ivspec);
 
                         File saveFile = getSaveFile(filename);
                         if (saveFile == null) {
@@ -215,7 +220,7 @@ public class SecurityTools {
 
             if (sizeMB > 500) {
                 localD = true;
-                MainFrame.feedbackArea.append("-> Storing file locally due to size.\n");
+                MainFrame.feedbackArea.append("\n-> Storing file locally due to size.\n");
             }
 
             try {
@@ -227,10 +232,14 @@ public class SecurityTools {
                 String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
 
                 Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-                cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+                byte[] iv = new byte[16];  
+                new SecureRandom().nextBytes(iv);  
+                IvParameterSpec ivSpec = new IvParameterSpec(iv);
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey,ivSpec);
 
                 if (localD) {
-                localMode(file,cipher,encodedKey);
+                localMode(file,cipher,encodedKey,iv);
+                return;
                 }
 
                 ByteArrayOutputStream encryptedStream = new ByteArrayOutputStream();
@@ -250,7 +259,7 @@ public class SecurityTools {
                              "INSERT INTO files (filename, filedata, username, isEncrypted) VALUES (?, ?, ?, ?)",
                              PreparedStatement.RETURN_GENERATED_KEYS);
                      PreparedStatement keyStmt = conn.prepareStatement(
-                             "INSERT INTO keys (id, filename, username, key) VALUES (?, ?, ?, ?)")) {
+                             "INSERT INTO keys (id, filename, username, key,IniVec) VALUES (?, ?, ?, ?, ?)")) {
                     fileStmt.setString(1, file.getName());
                     fileStmt.setBytes(2, encryptedData);
                     fileStmt.setString(3, GUI.loggedInUser);
@@ -264,6 +273,7 @@ public class SecurityTools {
                         keyStmt.setString(2, file.getName());
                         keyStmt.setString(3, GUI.loggedInUser);
                         keyStmt.setString(4, encodedKey);
+                        keyStmt.setBytes(5, iv);
                         keyStmt.executeUpdate();
                         MainFrame.feedbackArea.append("\nFile encrypted and saved to database with ID: " + fileId + "\n");
                     }
@@ -290,15 +300,15 @@ public class SecurityTools {
         }
         return localFile;
     }
-    private static void  localMode(File file,Cipher cipher,String encodedKey){
+    private static void  localMode(File file,Cipher cipher,String encodedKey,byte[] iv){
         try {
             File localFile = getLocalFile(file, cipher);
-            MainFrame.feedbackArea.append("<- File saved locally at: " + localFile.getAbsolutePath() + "\n");
+            MainFrame.feedbackArea.append("\n<- File saved locally at: " + localFile.getAbsolutePath() + "\n");
             try (Connection conn = DriverManager.getConnection(DB_URL);
                  PreparedStatement fileStmt = conn.prepareStatement(
-                         "INSERT INTO files (filename, filedata, username, isEncrypted) VALUES (?,?, ?, ?)");
+                         "INSERT INTO files (filename, filedata, username, isEncrypted) VALUES (?,?,?,?)");
                  PreparedStatement keyStmt = conn.prepareStatement(
-                         "INSERT INTO keys (id, username, filename, key) VALUES (?, ?, ?, ?)")) {
+                         "INSERT INTO keys (id, username, filename, key,IniVec) VALUES (?, ?, ?, ?,?)")) {
                 fileStmt.setString(1, file.getName());
                 fileStmt.setString(2, encodedKey);
                 fileStmt.setString(3, GUI.loggedInUser);
@@ -311,6 +321,7 @@ public class SecurityTools {
                     keyStmt.setString(2, GUI.loggedInUser);
                     keyStmt.setString(3, file.getName());
                     keyStmt.setString(4, encodedKey);
+                    keyStmt.setBytes(5, iv);
                     keyStmt.executeUpdate();
                 }
             }

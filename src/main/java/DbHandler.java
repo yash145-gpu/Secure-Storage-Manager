@@ -6,7 +6,7 @@ public class DbHandler {
     protected static final String DB_URL = "jdbc:sqlite:unified.db";
     private static final String CREATE_USERDATA_TABLE_SQL = "CREATE TABLE IF NOT EXISTS userdata (id INTEGER PRIMARY KEY AUTOINCREMENT ,username TEXT NOT NULL UNIQUE , password TEXT NOT NULL, Last_Login TEXT)";
     private static final String CREATE_FILES_TABLE_SQL = "CREATE TABLE IF NOT EXISTS files(id INTEGER PRIMARY KEY AUTOINCREMENT,filename TEXT NOT NULL,filedata BLOB NOT NULL,username TEXT NOT NULL, isEncrypted INTEGER NOT NULL DEFAULT 0)";
-    private static final String CREATE_KEYS_TABLE_SQL = "CREATE TABLE IF NOT EXISTS keys (keyId INTEGER PRIMARY KEY AUTOINCREMENT,id INTEGER, username TEXT NOT NULL , filename TEXT NOT NULL, key TEXT NOT NULL,FOREIGN KEY (id) REFERENCES files(id) ON DELETE CASCADE,FOREIGN KEY (username) REFERENCES userdata(username) ON DELETE CASCADE)";
+    private static final String CREATE_KEYS_TABLE_SQL = "CREATE TABLE IF NOT EXISTS keys (keyId INTEGER PRIMARY KEY AUTOINCREMENT,id INTEGER, username TEXT NOT NULL , filename TEXT NOT NULL, key TEXT NOT NULL,IniVec VARBINARY(16) NOT NULL,FOREIGN KEY (id) REFERENCES files(id) ON DELETE CASCADE,FOREIGN KEY (username) REFERENCES userdata(username) ON DELETE CASCADE)";
     private static final String CREATE_ADMIN_DATA_TABLE_SQL = "CREATE TABLE IF NOT EXISTS Admindata (id INTEGER PRIMARY KEY AUTOINCREMENT ,AdminName TEXT NOT NULL UNIQUE , password TEXT NOT NULL, Last_Login TEXT)";
     static void setupDatabase() {
      
@@ -95,14 +95,13 @@ static void AdminInit(){
             }
             try (Connection conn = DriverManager.getConnection(DB_URL);
                     PreparedStatement stmt = conn.prepareStatement(query);
-                    PreparedStatement keyStmt = conn.prepareStatement(
-                            "DELETE FROM keys WHERE filename=? AND username=" + "'" + GUI.loggedInUser + "'")) {
+                    PreparedStatement keyStmt = conn.prepareStatement("DELETE FROM keys WHERE filename=? AND username=" + "'" + GUI.loggedInUser + "'")) {
                 stmt.setString(1, fs);
                 int rowsAffected = stmt.executeUpdate();
                 keyStmt.setString(1, fs);
                 rowsAffected += keyStmt.executeUpdate();
-                feedbackArea.append(rowsAffected > 0 ? rowsAffected + " rows deleted."
-                        : rowsAffected + " Error , File does not exist for user");
+                feedbackArea.append(rowsAffected > 0 ? rowsAffected + " rows affected."
+                        : rowsAffected + "\n Error , File does not exist for user");
 
             } catch (Exception e) {
                 e.printStackTrace(System.out);
@@ -128,7 +127,7 @@ static void AdminInit(){
             s2tmt.setString(1, urs);
             s3mt.setString(1, urs);
             int rowsAffected = stmt.executeUpdate() + s2tmt.executeUpdate() + s3mt.executeUpdate();
-            feedbackArea.append(rowsAffected + " rows deleted.");
+            feedbackArea.append(rowsAffected + " rows deleted.\n");
         } catch (Exception e) {
             e.printStackTrace(System.out);
         }
