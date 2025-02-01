@@ -85,24 +85,35 @@ static void AdminInit(){
     }
 
     static void deletefile(JTextArea feedbackArea, String fs, int id) {
-        String query;
+        String query,kquery;
         {
             if (fs == null) {
-                query = "Delete FROM files where id = ? AND username=" + "'" + GUI.loggedInUser + "'";
-                fs = String.valueOf(id);
+                query = "DELETE FROM files where id = ? AND username= ?";
+                kquery = "DELETE FROM keys WHERE id = ? AND username= ?";;
             } else {
-                query = "DELETE FROM files WHERE filename = ? AND username=" + "'" + GUI.loggedInUser + "'";
+                query = "DELETE FROM files WHERE filename = ? AND username= ?";;
+                kquery = "DELETE FROM keys WHERE filename = ?AND username= ?";;
             }
             try (Connection conn = DriverManager.getConnection(DB_URL);
                     PreparedStatement stmt = conn.prepareStatement(query);
-                    PreparedStatement keyStmt = conn.prepareStatement("DELETE FROM keys WHERE filename=? AND username=" + "'" + GUI.loggedInUser + "'")) {
-                stmt.setString(1, fs);
+                    PreparedStatement keyStmt = conn.prepareStatement(kquery);) {
+                        if(fs == null){
+                            stmt.setInt(1, id);
+                            stmt.setString(2,GUI.loggedInUser);
+                            keyStmt.setInt(1, id);
+                            keyStmt.setString(2,GUI.loggedInUser);
+                        }
+                        else{ 
+                            stmt.setString(2,GUI.loggedInUser);
+                            stmt.setString(1, fs);
+                            keyStmt.setString(1, fs);
+                            keyStmt.setString(2,GUI.loggedInUser);
+                        }
+                        
                 int rowsAffected = stmt.executeUpdate();
-                keyStmt.setString(1, fs);
-                rowsAffected += keyStmt.executeUpdate();
-                feedbackArea.append(rowsAffected > 0 ? rowsAffected + " rows affected."
-                        : rowsAffected + "\n Error , File does not exist for user");
+                rowsAffected +=  keyStmt.executeUpdate();
 
+                feedbackArea.append(rowsAffected > 0 ? rowsAffected + " rows affected." : rowsAffected + "\n Error , File does not exist for user");
             } catch (Exception e) {
                 e.printStackTrace(System.out);
             }
