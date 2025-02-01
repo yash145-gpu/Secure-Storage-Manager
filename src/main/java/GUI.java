@@ -130,8 +130,8 @@ public class GUI extends JFrame implements Runnable{
         login.setVisible(true);
       
         help.addActionListener(e ->{JOptionPane.showMessageDialog(null,"Secure Storage Manager release 1.0.0 \n\n"+"AES 256 : Symmetric encryption of files with any extension type , files can be stored on database or local directory based on size,\ngenerates secure random key.\n\n"+"SHA File Checksum : Generates SHA256/512 hash for a file.\n\n"+"File Database Backup : Encodes file data and stores directly on embedded database without encryption.\n\n"+"Admin login : For directly manipulating database with predefined tools (Default ID,Password : (Admin,Admin) , can be updated).\n\n"+"User login : Credentials are hashed and stored securely.\n\n");});
-        Log.addActionListener(e -> {AuthenticationModule.loginUser(0);AuthenticationModule.lastLogin(0);});
-        Admlog.addActionListener(e -> {AuthenticationModule.loginUser(1); AuthenticationModule.lastLogin(1);});
+        Log.addActionListener(e -> {AuthenticationModule.loginUser(0); });
+        Admlog.addActionListener(e -> {AuthenticationModule.loginUser(1);});
         Reg.addActionListener(e -> UserManager.registerUser(userField,passwdField));
     
     }
