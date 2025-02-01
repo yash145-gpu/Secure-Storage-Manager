@@ -85,7 +85,7 @@ public class MainFrame {
         fileButtonPanel.add(retrieveFileButton);
         for (Component component : fileButtonPanel.getComponents()) {
                 component.setBackground(Color.GRAY);
-                component.setPreferredSize(new Dimension(200,50));
+                component.setPreferredSize(new Dimension(200,55));
                 component.setFocusable(false);
         }
         JScrollPane tableScrollPane = new JScrollPane(resultTable);
