@@ -9,7 +9,7 @@ public class AuthenticationModule {
     static void loginUser(int adm) {
         String username = GUI.userField.getText().trim();
         String password = new String(GUI.passwdField.getPassword()).trim();
-
+        int lastlog=0;
         if (username.isEmpty() || password.isEmpty()) {
 
             JOptionPane.showMessageDialog(null, "Fields cannot be empty");
@@ -34,10 +34,12 @@ public class AuthenticationModule {
                     MainFrame mf = new MainFrame();
                     MainFrame.mainframe.setTitle("Welcome " + GUI.loggedInUser);
                     MainFrame.mainframe.setVisible(true);
+                    
 
                 } else if (adm == 1) {
                     AdminTools adminSession = new AdminTools();
                     GUI.login.setVisible(false);
+                    lastlog=1;
 
                 }
             } else {
@@ -46,13 +48,19 @@ public class AuthenticationModule {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error logging in: " + e.getMessage() + "\n");
         }
+        if(lastlog == 0){
+            lastLogin(0);
+        }
+        else{
+            lastLogin(1);
+        }
     }
 
     public static void lastLogin(int user) {
         String selectQuery;
         String updateQuery;
         String name = GUI.userField.getText();
-        String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy      HH:mm:ss"));
         if (user == 1) {
             selectQuery = "SELECT Last_Login FROM Admindata WHERE AdminName = ?";
             updateQuery = "UPDATE Admindata SET Last_Login = ? WHERE AdminName = ?";
@@ -77,10 +85,10 @@ public class AuthenticationModule {
 
             if (user == 0) {
                 MainFrame.feedbackArea.setText("Welcome " + name
-                        + (lastLogin != null ? "  Last login : " + lastLogin : " this is your First login"));
+                        + (lastLogin != null ? "  Last login : " + lastLogin+"\n" : " this is your First login\n"));
             } else {
                 AdminTools.feedbackArea.setText("Welcome Administrator " + name
-                        + (lastLogin != null ? "  Last login : " + lastLogin : " this is your First login"));
+                        + (lastLogin != null ? "  Last login : " + lastLogin+"\n" : " this is your First login\n"));
             }
 
             try (PreparedStatement ustmt = conn.prepareStatement(updateQuery)) {
