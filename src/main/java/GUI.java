@@ -89,7 +89,7 @@ public class GUI extends JFrame implements Runnable{
             c.setBounds(r);
         }
         int ox=0,os=0;
-      if(screenWidth > 1366) {os = 10; ox=80;};
+      if(screenWidth > 1366) {os = 10; ox=50;};
         label1 = new JLabel(" Secure Storage");
         label1.setFont(new Font("Arial", Font.ITALIC, 64+os));
         label1.setForeground(Color.WHITE);
@@ -102,7 +102,7 @@ public class GUI extends JFrame implements Runnable{
         label2.setBounds(88+ox, 82, 500, 80);
         srl = new JLabel("<html><u>Github</u></html>");
         srl.setVisible(false);
-        srl.setBounds(250+ox,360+ox+ox,200,170);
+        srl.setBounds(235+ox,360+150,200,170);
         srl.setForeground(Color.GRAY);
         srl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         JButton help = new JButton("<html><u>Help</u>");
