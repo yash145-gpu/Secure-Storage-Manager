@@ -25,11 +25,10 @@ public class MainFrame {
     private final JPanel filePanel;
     private final JButton backButton;
     private final DefaultTableModel tableModel;    
-    protected static JTextArea feedbackArea;
+    protected static JTextArea feedbackArea =  new JTextArea(5, 40);;
     protected static JFrame mainframe;
 
     public MainFrame(){
-          feedbackArea = new JTextArea(5, 40);
         feedbackArea.setFont(new Font("Arial",0,16));
         feedbackArea.setEditable(false);
         JScrollPane feedbackScrollPane = new JScrollPane(feedbackArea);
@@ -140,22 +139,22 @@ public class MainFrame {
             tmp.setLayout(new GridLayout(5, 1));
             tmp.setSize(600, 500);
             tmp.setVisible(true);
-            JLabel lon = new JLabel("Current Name");
-            JTextField ct = new JTextField("current name");
-            JLabel lnn = new JLabel("New Name");
-            JTextField nt = new JTextField("new name");
-            JLabel lop = new JLabel("Current Password");
-            JTextField opt = new JTextField("old Password");
-            JLabel lnp = new JLabel("New Password");
-            JTextField npt = new JTextField("New Password");
+            JLabel lb_on = new JLabel("Current Name");
+            JTextField ct = new JTextField();
+            JLabel lb_nn = new JLabel("New Name");
+            JTextField nt = new JTextField();
+            JLabel lb_op = new JLabel("Current Password");
+            JTextField opt = new JTextField();
+            JLabel lb_np = new JLabel("New Password");
+            JTextField npt = new JTextField();
             JButton updt = new JButton("Update");
-            tmp.add(lon);
+            tmp.add(lb_on);
             tmp.add(ct);
-            tmp.add(lnn);
+            tmp.add(lb_nn);
             tmp.add(nt);
-            tmp.add(lop);
+            tmp.add(lb_op);
             tmp.add(opt);
-            tmp.add(lnp);
+            tmp.add(lb_np);
             tmp.add(npt);
             tmp.add(updt);
 
