@@ -8,8 +8,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+/**Project : Secure Storage Manager
+ * @version 1.0.0
+ * This is the main class to the project
+ * @author Yash Shinde
+ */
 
 public class GUI extends JFrame implements Runnable{
+
     protected static JFrame login;
     private static BufferedImage img;
     protected static String loggedInUser;
@@ -19,18 +25,19 @@ public class GUI extends JFrame implements Runnable{
     protected static JTextField userField;
     protected static ImageIcon imz;
     GUI(){
-      DbHandler.setupDatabase();  
-      run();
+      DbHandler.setupDatabase();   //Initializes all database tables at startup
+     
+      run();                       //GUI login image generation
         JPanel backgroundPanel = new JPanel() {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                     g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
             }
         };
-        screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        screenSize = Toolkit.getDefaultToolkit().getScreenSize();  //For native screen resolution with factors for layout components
         int screenWidth = screenSize.width;
         int screenHeight = screenSize.height;
-        int sw = screenWidth - 620;
+        int sw = screenWidth - 620;     
         int sh = screenHeight - 680;
         imz = new ImageIcon(getClass().getResource("ism.png"));
         login = new JFrame("Login");
@@ -93,7 +100,7 @@ public class GUI extends JFrame implements Runnable{
             c.setBounds(r);
         }
         int ox=0,os=0;
-      if(screenWidth > 1366) {os = 10; ox=50;};
+        if(screenWidth > 1366) {os = 10; ox=50;};
         label1 = new JLabel(" Secure Storage");
         label1.setFont(new Font("Arial", Font.ITALIC, 64+os));
         label1.setForeground(Color.WHITE);
@@ -141,14 +148,17 @@ public class GUI extends JFrame implements Runnable{
         "File Database Backup : Encodes file data and stores directly on embedded database without encryption.\n\n"
         +"Admin login : For directly manipulating database with predefined tools (Default ID,Password : (Admin,Admin) , can be updated).\n\n"
         +"User login : Credentials are hashed and stored securely.\n\n");});
-
-        Log.addActionListener(e -> {AuthenticationModule.loginUser(0); });
+ 
+/*User login , default Admin is created at startup
+  *creadentials for Admin can be changed in program aswell as in source (DbHandler.java)
+  * Default Admin login : username = Admin , password = Admin
+ */
+        Log.addActionListener(e -> {AuthenticationModule.loginUser(0); });  
         Admlog.addActionListener(e -> {AuthenticationModule.loginUser(1);});
         Reg.addActionListener(e -> UserManager.registerUser(userField,passwdField));
-    
     }
 
-    private JButton getButton() {
+    private JButton getButton() {       //Custom JButton for link to source 
         JButton yp = new JButton();
         yp.setBounds(0, 0, 570,(int)screenSize.getHeight());
         yp.setOpaque(false);
