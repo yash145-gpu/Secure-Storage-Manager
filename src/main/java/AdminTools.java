@@ -54,8 +54,9 @@ public class AdminTools {
         toolPanel.add(DM);
         toolPanel.add(LM);
         toolPanel.add(lo);
+        int ht = GUI.screenSize.height/12;
         for(Component c : toolPanel.getComponents()){
-            c.setPreferredSize(new Dimension(180,70));
+            c.setPreferredSize(new Dimension(180,ht));
             c.setFocusable(false);
         }
         queryInputPanel.add(toolPanel, BorderLayout.WEST);
