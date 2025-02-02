@@ -1,9 +1,22 @@
-import javax.swing.*;
+import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
-import java.sql.*;
+import java.sql.DriverManager;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
+
+/** DbHandler.java
+* Methods for handling backend of database operations
+* Creates necessary tables on startup of system
+* @author Yash Shinde
+*/
 
 public class DbHandler {
-    protected static final String DB_URL = "jdbc:sqlite:unified.db";
+    protected static final String DB_URL = "jdbc:sqlite:unified.db"; //Database URL , name : unified.db
     private static final String CREATE_USERDATA_TABLE_SQL = "CREATE TABLE IF NOT EXISTS userdata (id INTEGER PRIMARY KEY AUTOINCREMENT ,username TEXT NOT NULL UNIQUE , password TEXT NOT NULL, Last_Login TEXT)";
     private static final String CREATE_FILES_TABLE_SQL = "CREATE TABLE IF NOT EXISTS files(id INTEGER PRIMARY KEY AUTOINCREMENT,filename TEXT NOT NULL,filedata BLOB NOT NULL,username TEXT NOT NULL, isEncrypted INTEGER NOT NULL DEFAULT 0)";
     private static final String CREATE_KEYS_TABLE_SQL = "CREATE TABLE IF NOT EXISTS keys (keyId INTEGER PRIMARY KEY AUTOINCREMENT,id INTEGER, username TEXT NOT NULL , filename TEXT NOT NULL, key TEXT NOT NULL,IniVec VARBINARY(16) NOT NULL,FOREIGN KEY (id) REFERENCES files(id) ON DELETE CASCADE,FOREIGN KEY (username) REFERENCES userdata(username) ON DELETE CASCADE)";
@@ -12,7 +25,7 @@ public class DbHandler {
      
         try (Connection conn = DriverManager.getConnection(DB_URL);
                 Statement stmt = conn.createStatement()) {
-            stmt.execute("PRAGMA foreign_keys = ON");
+            stmt.execute("PRAGMA foreign_keys = ON"); //Foreign key support
             stmt.execute(CREATE_FILES_TABLE_SQL);
             stmt.execute(CREATE_USERDATA_TABLE_SQL);
             stmt.execute(CREATE_KEYS_TABLE_SQL);
@@ -22,13 +35,13 @@ public class DbHandler {
             JOptionPane.showMessageDialog(null,"Error setting up database: \n" + e.getMessage() + "\n");
         }
     }
-static void AdminInit(){
+static void AdminInit(){  //Initializes default Admin 
     String initAdm = UserManager.hashPassword("Admin");
     String checkAdminSQL = "SELECT COUNT(*) FROM Admindata";
     try (Connection conn = DriverManager.getConnection(DB_URL); PreparedStatement pstmtCheck = conn.prepareStatement(checkAdminSQL)) { 
         ResultSet rs = pstmtCheck.executeQuery();
     if(rs.next()){
-        if (rs.getInt(1) == 0) {
+        if (rs.getInt(1) == 0) {  //Creates default admin when no admin exists
             String insertAdminSQL = "INSERT INTO Admindata (AdminName, password) VALUES (?, ?)";
             try (PreparedStatement pstmtInsert = conn.prepareStatement(insertAdminSQL)) {
                 pstmtInsert.setString(1, "Admin");  
@@ -38,23 +51,21 @@ static void AdminInit(){
         } else {
             return;
         }
-    }
-    }
+    }  }
  catch (SQLException e) {
     JOptionPane.showMessageDialog(null, "Error setting up database: \n" + e.getMessage() + "\n");
 }
-  
 }
-    static void executeSQLQuery(JTextArea feedbackArea, String query, DefaultTableModel tableModel) {
-
-        if (query.isEmpty()) {
+ 
+static void executeSQLQuery(JTextArea feedbackArea, String query, DefaultTableModel tableModel){
+//Admin tool , executes sql query from string and displays output in tablemodel        
+    if (query.isEmpty()) {
             feedbackArea.setText("Please enter a query.\n");
             return;
         }
-
         try (Connection conn = DriverManager.getConnection(DB_URL);
                 Statement stmt = conn.createStatement()) {
-            if (query.toLowerCase().startsWith("select")) {
+            if (query.toLowerCase().startsWith("select")) { //Display
                 ResultSet rs = stmt.executeQuery(query);
                 displayResultSet(rs, tableModel);
             } else {
@@ -65,7 +76,6 @@ static void AdminInit(){
             feedbackArea.append("\nError executing query: " + e.getMessage() + "\n");
         }
     }
-
     static void displayResultSet(ResultSet rs, DefaultTableModel tableModel) throws SQLException {
         tableModel.setRowCount(0);
         tableModel.setColumnCount(0);
@@ -84,7 +94,8 @@ static void AdminInit(){
         }
     }
 
-    static void deletefile(JTextArea feedbackArea, String fs, int id) {
+    static void deletefile(JTextArea feedbackArea, String fs, int id) { 
+        //Deletes file and associated key by id or filename
         String query,kquery;
         {
             if (fs == null) {
@@ -121,6 +132,8 @@ static void AdminInit(){
     }
 
     static void deleteuser(JTextArea feedbackArea, String urs) {
+        //Removes user,userfiles,userkeys
+        
         try (Connection conn = DriverManager.getConnection(DB_URL);
                 Statement stmt = conn.createStatement()) {
             stmt.execute("PRAGMA foreign_keys = ON");
