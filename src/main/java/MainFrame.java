@@ -20,6 +20,11 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
+/** MainFrame.java
+ *  User GUI with all cryptographic,file management functionalities
+ *  @author Yash Shinde
+ */
+
 public class MainFrame {
     private final JComboBox<File> driveComboBox;
     private final JPanel filePanel;
@@ -31,13 +36,16 @@ public class MainFrame {
     public MainFrame(){
         feedbackArea.setFont(new Font("Arial",0,16));
         feedbackArea.setEditable(false);
-        JScrollPane feedbackScrollPane = new JScrollPane(feedbackArea);
+        JScrollPane feedbackScrollPane = new JScrollPane(feedbackArea);  //Action message display
         JPanel Menu = new JPanel(new BorderLayout());
         JPanel topPanel = new JPanel();
-        driveComboBox = new JComboBox<>(File.listRoots());
-        backButton = new JButton("Back");
-        JButton DM = new JButton("Dark Mode");
+        driveComboBox = new JComboBox<>(File.listRoots()); //Selects Drive
+        backButton = new JButton("Back"); 
+
+        //3 GUI modes : Default:0 , Darkmode:1 , Lightmode:2 
+        JButton DM = new JButton("Dark Mode"); 
         JButton LM = new JButton("Light Mode");
+
         topPanel.add(driveComboBox);
         topPanel.add(DM);
         topPanel.add(LM);
@@ -57,7 +65,7 @@ public class MainFrame {
         mainframe.setLayout(new BorderLayout());
         mainframe.setSize(GUI.screenSize.width, GUI.screenSize.height);
         mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainframe.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        mainframe.setExtendedState(JFrame.MAXIMIZED_BOTH); //Full Screen
         JPanel bp = new JPanel();
         bp.setLayout(new BorderLayout());
 
@@ -68,7 +76,8 @@ public class MainFrame {
         JButton retrieveFileButton = new JButton("Retrieve File from DB");
 
         tableModel = new DefaultTableModel();
-        JTable resultTable = new JTable(tableModel);
+        JTable resultTable = new JTable(tableModel); //For displaying user data in table format
+
         JButton enc = new JButton("AES File Encryption");
         JButton dec = new JButton("AES File Decryption");
         JButton vf = new JButton("View Files");
@@ -76,7 +85,7 @@ public class MainFrame {
         JButton SHA2 = new JButton("SHA-256 File Checksum");
         JButton vk = new JButton("View Keys");
         JButton reset = new JButton("Reset username or password");
-        vk.addActionListener(e -> DbHandler.executeSQLQuery(feedbackArea,"SELECT* FROM KEYS",tableModel));
+        JButton Logout= new JButton("Log out");
         fileButtonPanel.add(SHA2);
         fileButtonPanel.add(SHA5);
         fileButtonPanel.add(vf);
@@ -92,23 +101,26 @@ public class MainFrame {
                 component.setPreferredSize(new Dimension(200,55));
                 component.setFocusable(false);
         }
+
         JScrollPane tableScrollPane = new JScrollPane(resultTable);
         feedbackScrollPane.setPreferredSize(new Dimension(600,500));
         feedbackScrollPane.setBackground(Color.GRAY);
+       
         Menu.add(fileButtonPanel,BorderLayout.WEST);
         bp.add(feedbackScrollPane,BorderLayout.EAST);
         bp.add(Menu,BorderLayout.WEST);
         bp.add(tableScrollPane,BorderLayout.CENTER);
-        JButton Logout= new JButton("Logout");
-        Logout.addActionListener(e-> {
-            feedbackArea.setText(" ");
-            mainframe.dispose();
-            GUI.login.setVisible(true);});
-            bp.add(Logout,BorderLayout.SOUTH);
-            
+        bp.add(Logout,BorderLayout.SOUTH);
         mainframe.add(bp);
 
-        rm_file.addActionListener( e -> {
+        Logout.addActionListener(e-> {  //logs out to login GUI
+            feedbackArea.setText(" ");
+            mainframe.dispose(); 
+            GUI.login.setVisible(true); 
+        });
+            
+        rm_file.addActionListener( e -> { //Removes file and any key associated with it
+            
             String[] op = {"ID","Name"};
             int choice = JOptionPane.showOptionDialog(null,"Enter file to delete","Delete mode",JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null,op,op[0]);
             if(choice == 0){
@@ -123,9 +135,16 @@ public class MainFrame {
                 return;
             }
         });
-          enc.addActionListener(e -> SecurityTools.encryptFileToDatabase());
-        dec.addActionListener(e -> SecurityTools.decryptFile());
+        //Fetches keys for user
+        vk.addActionListener(e -> DbHandler.executeSQLQuery(feedbackArea,"SELECT* FROM keys WHERE username="+"'"+GUI.loggedInUser+"'",tableModel)); 
+          
+        enc.addActionListener(e -> SecurityTools.encryptFileToDatabase()); //AES Encryption
+        dec.addActionListener(e -> SecurityTools.decryptFile()); //AES Decryption
+        
+        //Fetches files for user
         vf.addActionListener(e -> {  String query = "select * from files where username= "+"'"+GUI.loggedInUser+"'"; DbHandler.executeSQLQuery(feedbackArea,query,tableModel);});
+        
+        //Checksums
         SHA2.addActionListener(e -> {    JFileChooser fileChooser = new JFileChooser();
             int result = fileChooser.showOpenDialog(null);
             if (result == JFileChooser.APPROVE_OPTION) {
@@ -136,10 +155,12 @@ public class MainFrame {
             if (result == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
                 SecurityTools.hashfile(file,1);}});
+
         saveFileButton.addActionListener(e ->BackupManager.saveFileToDatabase());
         retrieveFileButton.addActionListener(e ->BackupManager.retrieveFileFromDatabase());
-         reset.addActionListener(e -> {
-            JFrame tmp = new JFrame("Update Credentials");
+        
+        reset.addActionListener(e -> { 
+            JFrame tmp = new JFrame("Update Credentials"); 
             tmp.setLayout(new GridLayout(5, 1));
             tmp.setSize(600, 500);
             tmp.setVisible(true);
@@ -171,6 +192,7 @@ public class MainFrame {
             });
         });
 
+//Dark mode
 DM.addActionListener(e -> {
 mode = 1;
  for(Component c : topPanel.getComponents()){
@@ -232,7 +254,7 @@ for(Component c : fileButtonPanel.getComponents()){
 
 
 public static void changeUserCredentials(String currentName, String currentPassword, String newName,String newPassword) {
-if(UserManager.userNameAlreadyExists(newName)){
+if(UserManager.userNameAlreadyExists(newName)){ 
     JOptionPane.showMessageDialog(null, "Username already exists.");
     return;
 }

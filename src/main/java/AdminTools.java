@@ -7,6 +7,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**AdminTools.java
+ * Admin specific GUI and tools,sqlite3 query execution console to manage the database file 
+ * @author Yash shinde
+ */
+
 public class AdminTools {
     static String loggedInUser;
     private final JTextArea queryInput;
@@ -14,9 +19,8 @@ public class AdminTools {
     protected static  JTextArea feedbackArea;
 
     AdminTools() {
-
-        JButton view = new JButton("View Users");
-        JFrame mainfr = new JFrame("WELCOME ADMIN");
+        //Admin Frame
+        JFrame mainfr = new JFrame("WELCOME ADMIN"); 
         ImageIcon imz = new ImageIcon(getClass().getResource("ism.png"));
         mainfr.setIconImage(imz.getImage());
         mainfr.setLayout(new BorderLayout());
@@ -25,22 +29,24 @@ public class AdminTools {
         mainfr.setExtendedState(JFrame.MAXIMIZED_BOTH);
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BorderLayout());
+       
+        //query console
         JPanel queryInputPanel = new JPanel(new BorderLayout());
         queryInput = new JTextArea("Enter SQL query here",10, 50);
         queryInput.setLineWrap(true);
         queryInput.setFont(new Font("Arial", 0, 16));
-       
         JButton executeQueryButton = new JButton("Execute SQL Query");
-
         queryInputPanel.add(new JLabel("Enter SQL Query:"), BorderLayout.NORTH);
         queryInputPanel.add(queryInput, BorderLayout.CENTER);
+        
+        //predefined query tools
         JPanel toolPanel = new JPanel();
         toolPanel.setPreferredSize(new Dimension(200, 500));
-       
+        JButton view = new JButton("View Users");
         JButton viewF = new JButton("View  Files");
         JButton rm_usr = new JButton("Remove User");
         JButton rm_fl = new JButton("Remove Files");
-        JButton vm = new JButton("VACUUM DB");
+        JButton vm = new JButton("VACUUM DB"); //Maintainence : Resizes database file by recovering the space occupied tuples/files that were removed 
         JButton reset = new JButton("Reset Admin Name/Password");
         JButton lo = new JButton("Log Out");
         JButton DM = new JButton("Dark Mode");
@@ -80,6 +86,8 @@ public class AdminTools {
         infoPanel.add(queryInputPanel, BorderLayout.CENTER);
         mainfr.add(infoPanel);
         mainfr.setVisible(true);
+
+        //Removes user by username 
         rm_usr.addActionListener(e -> {
             String usr = JOptionPane.showInputDialog("Enter Username");
 
@@ -90,6 +98,7 @@ public class AdminTools {
             DbHandler.deleteuser(feedbackArea, usr);
         });
 
+         //Remove file , by id or filename
         rm_fl.addActionListener(e -> {
             String[] op = { "ID", "Name" };
             int choice = JOptionPane.showOptionDialog(toolPanel.getParent(), "Enter file to delete", "Delete mode",
@@ -121,12 +130,15 @@ public class AdminTools {
             String query = "select * from userdata";
             DbHandler.executeSQLQuery(feedbackArea, query, tableModel);
         });
+
+        //Executes entered query and displays message in feedbackArea , output in resultTable 
         executeQueryButton.addActionListener(e -> {
             String query = queryInput.getText().trim();
             DbHandler.executeSQLQuery(feedbackArea, query, tableModel);
         });
+
         reset.addActionListener(e -> {
-            JFrame tmp = new JFrame("Update Credentials");
+            JFrame tmp = new JFrame("Update Credentials"); //temperory frame for taking current & new credentials
             tmp.setLayout(new GridLayout(5, 1));
             tmp.setSize(600, 500);
             tmp.setVisible(true);
@@ -148,7 +160,6 @@ public class AdminTools {
             tmp.add(lnp);
             tmp.add(npt);
             tmp.add(updt);
-
             updt.addActionListener(ee -> {
                 String ctt = ct.getText();
                 String cpp = opt.getText();
@@ -157,6 +168,8 @@ public class AdminTools {
                 changeAdminCredentials(ctt, cpp, cnn, ppnt);
             });
         });
+
+        //Dark mode
         DM.addActionListener(e -> {
             for(Component c : toolPanel.getComponents()){
                 c.setBackground(Color.BLACK);
@@ -175,6 +188,7 @@ public class AdminTools {
        toolPanel.setBackground(Color.GRAY);
         });
     
+    //Light Mode
     LM.addActionListener(e -> {
         for(Component c : toolPanel.getComponents()){
             c.setBackground(Color.WHITE);
@@ -195,10 +209,10 @@ public class AdminTools {
 }
 
     public static void changeAdminCredentials(String currentAdminName, String currentPassword, String newAdminName,String newPassword) {
-        currentPassword = UserManager.hashPassword(currentPassword);
+        //SHA256 Hashing to validate with stored password
+        currentPassword = UserManager.hashPassword(currentPassword); 
         newPassword = UserManager.hashPassword(newPassword);
         try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL)) {
-
             String validateQuery = "SELECT * FROM Admindata WHERE AdminName = ? AND password = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(validateQuery)) {
                 pstmt.setString(1, currentAdminName);

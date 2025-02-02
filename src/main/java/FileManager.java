@@ -2,6 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
+/**FileManager.java
+ * Interactive file access/operations
+ * @author Yash Shinde
+ */
 public class FileManager {
     protected static File currentDirectory;
 
@@ -10,7 +14,7 @@ public class FileManager {
         currentDirectory = directory;
         backButton.setEnabled(directory.getParentFile() != null);
 
-        File[] files = directory.listFiles();
+        File[] files = directory.listFiles(); //Displays all files in a directory
         if (files != null) {
             for (File file : files) {
                 JButton fileButton = new JButton(file.getName());
@@ -23,11 +27,11 @@ public class FileManager {
                     fileButton.setForeground(Color.BLACK);
                     fileButton.setBackground(Color.WHITE);
                 }
-                fileButton.addActionListener(e -> {
+                fileButton.addActionListener(e -> { //File selection
                     if (file.isDirectory()) {
                         listFiles(file, filePanel, backButton);
                     } else {
-                        String[] options = { "Save to DB", "Encrypt and Save", "SHA File Checksum", "Cancel" };
+                        String[] options = { "Save to DB", "Encrypt and Save", "SHA File Checksum", "Cancel" }; //file operations on selected file
                         int choice = JOptionPane.showOptionDialog(null,
                                 "What would you like to do with the file?",
                                 "File Action",
@@ -44,7 +48,7 @@ public class FileManager {
                                 SecurityTools.encryptFileToDatabase(file);
                                 break;
                             case 2:
-                                String[] shs = { "SHA256", "SHA512" };
+                                String[] shs = { "SHA256", "SHA512" }; //Checksum options
                                 int ch = JOptionPane.showOptionDialog(null,"Please Select Secure Hashing Algorithm ",  "Select SHA Algorithm",
                                         JOptionPane.DEFAULT_OPTION,
                                         JOptionPane.QUESTION_MESSAGE, null, shs,
@@ -62,8 +66,9 @@ public class FileManager {
         filePanel.revalidate();
         filePanel.repaint();
     }
-
-    protected static void navigateBack(JPanel filePanel, JButton backButton) {
+    
+    //Back button ,lists parent directory
+    protected static void navigateBack(JPanel filePanel, JButton backButton) { 
         if (currentDirectory != null && currentDirectory.getParentFile() != null) {
             listFiles(currentDirectory.getParentFile(), filePanel, backButton);
         }
