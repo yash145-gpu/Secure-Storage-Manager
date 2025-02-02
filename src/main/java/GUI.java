@@ -7,6 +7,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+
 public class GUI extends JFrame implements Runnable{
     protected static JFrame login;
     private static BufferedImage img;
@@ -44,6 +46,7 @@ public class GUI extends JFrame implements Runnable{
         label3.setForeground(Color.WHITE);
         label3.setBounds(sw, sh, 300, 50);
         backgroundPanel.add(label3);
+        
         userField = new JTextField();
         userField.setBounds(sw, sh+70, 320, 40);
         backgroundPanel.add(userField);
@@ -52,11 +55,12 @@ public class GUI extends JFrame implements Runnable{
         label4.setFont(new Font("Arial", Font.BOLD, 26));
         label4.setForeground(Color.WHITE);
         label4.setBounds(sw, sh+150, 300, 50);
+        backgroundPanel.add(label4);
 
         passwdField = new JPasswordField();
         passwdField.setBounds(sw, sh+230, 320, 40);
         backgroundPanel.add(passwdField);
-        backgroundPanel.add(label4);
+     
         JButton Log = new JButton("LOGIN");
         Log.setFont(new Font("Arial", Font.ITALIC,17));
         Log.setBounds(sw, sh+320, 150, 40);
@@ -95,14 +99,16 @@ public class GUI extends JFrame implements Runnable{
         label1.setForeground(Color.WHITE);
         label1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         label1.setBounds(18+ox, 10, 600, 80);
+
         label2 = new JLabel("  Manager");
         label2.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         label2.setFont(new Font("ARIAL", Font.ITALIC, 64+os));
         label2.setForeground(Color.WHITE);
         label2.setBounds(88+ox, 82, 500, 80);
+
         srl = new JLabel("<html><u>Github</u></html>");
         srl.setVisible(false);
-        srl.setBounds(235+ox,360+150,200,170);
+        srl.setBounds(235+ox,510,200,170);
         srl.setForeground(Color.GRAY);
         srl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         JButton help = new JButton("<html><u>Help</u>");
@@ -129,7 +135,13 @@ public class GUI extends JFrame implements Runnable{
         login.add(backgroundPanel, BorderLayout.CENTER);
         login.setVisible(true);
       
-        help.addActionListener(e ->{JOptionPane.showMessageDialog(null,"Secure Storage Manager release 1.0.0 \n\n"+"AES 256 : Symmetric encryption of files with any extension type , files can be stored on embedded database or local directory based on size ,\ngenerates secure random key and initialization vector.\n\n"+"SHA File Checksum : Generates SHA256/512 hash for a file.\n\n"+"File Database Backup : Encodes file data and stores directly on embedded database without encryption.\n\n"+"Admin login : For directly manipulating database with predefined tools (Default ID,Password : (Admin,Admin) , can be updated).\n\n"+"User login : Credentials are hashed and stored securely.\n\n");});
+        help.addActionListener(e ->{JOptionPane.showMessageDialog(null,"Secure Storage Manager release 1.0.0 \n\n"
+        +"AES 256 : Symmetric encryption of files with any extension type , files can be stored on embedded database or local directory based on size ,\ngenerates secure random key and initialization vector.\n\n"
+        +"SHA File Checksum : Generates SHA256/512 hash for a file.\n\n"+
+        "File Database Backup : Encodes file data and stores directly on embedded database without encryption.\n\n"
+        +"Admin login : For directly manipulating database with predefined tools (Default ID,Password : (Admin,Admin) , can be updated).\n\n"
+        +"User login : Credentials are hashed and stored securely.\n\n");});
+
         Log.addActionListener(e -> {AuthenticationModule.loginUser(0); });
         Admlog.addActionListener(e -> {AuthenticationModule.loginUser(1);});
         Reg.addActionListener(e -> UserManager.registerUser(userField,passwdField));
