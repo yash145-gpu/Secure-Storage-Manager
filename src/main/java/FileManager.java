@@ -16,6 +16,13 @@ public class FileManager {
                 JButton fileButton = new JButton(file.getName());
                 fileButton.setAlignmentX(Component.LEFT_ALIGNMENT);
                 fileButton.setPreferredSize(new Dimension(30, 100));
+                if(MainFrame.mode==1){
+                    fileButton.setForeground(Color.WHITE);
+                    fileButton.setBackground(Color.BLACK);
+                }else if(MainFrame.mode == 2){
+                    fileButton.setForeground(Color.BLACK);
+                    fileButton.setBackground(Color.WHITE);
+                }
                 fileButton.addActionListener(e -> {
                     if (file.isDirectory()) {
                         listFiles(file, filePanel, backButton);

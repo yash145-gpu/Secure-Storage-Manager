@@ -27,17 +27,21 @@ public class MainFrame {
     private final DefaultTableModel tableModel;    
     protected static JTextArea feedbackArea =  new JTextArea(5, 40);;
     protected static JFrame mainframe;
-
+    protected static int mode;
     public MainFrame(){
         feedbackArea.setFont(new Font("Arial",0,16));
         feedbackArea.setEditable(false);
         JScrollPane feedbackScrollPane = new JScrollPane(feedbackArea);
         JPanel Menu = new JPanel(new BorderLayout());
-        JPanel topPanel = new JPanel(new BorderLayout());
+        JPanel topPanel = new JPanel();
         driveComboBox = new JComboBox<>(File.listRoots());
         backButton = new JButton("Back");
-        topPanel.add(driveComboBox, BorderLayout.WEST);
-        topPanel.add(backButton, BorderLayout.EAST);
+        JButton DM = new JButton("Dark Mode");
+        JButton LM = new JButton("Light Mode");
+        topPanel.add(driveComboBox);
+        topPanel.add(DM);
+        topPanel.add(LM);
+        topPanel.add(backButton);
         Menu.add(topPanel, BorderLayout.NORTH);
         filePanel = new JPanel();
         filePanel.setLayout(new BoxLayout(filePanel, BoxLayout.Y_AXIS));
@@ -58,7 +62,7 @@ public class MainFrame {
         bp.setLayout(new BorderLayout());
 
         JPanel fileButtonPanel = new JPanel();
-        fileButtonPanel.setPreferredSize(new Dimension(200,1000));
+        fileButtonPanel.setPreferredSize(new Dimension(230,1000));
         JButton saveFileButton = new JButton("Save File to DB");
         JButton SHA5 = new JButton("SHA-512 Checksum");
         JButton retrieveFileButton = new JButton("Retrieve File from DB");
@@ -166,8 +170,68 @@ public class MainFrame {
                 changeUserCredentials(ctt, cpp, cnn, ppnt);
             });
         });
+
+DM.addActionListener(e -> {
+mode = 1;
+ for(Component c : topPanel.getComponents()){
+c.setBackground(Color.BLACK);
+c.setForeground(Color.WHITE);
+topPanel.setBackground(Color.BLACK);
+c.setFocusable(false);
+}
+for(Component c : fileButtonPanel.getComponents()){
+    c.setBackground(Color.BLACK);
+    c.setForeground(Color.WHITE);
+    fileButtonPanel.setBackground(Color.BLACK);
+    c.setFocusable(false);
     }
-    public static void changeUserCredentials(String currentName, String currentPassword, String newName,String newPassword) {
+    for(Component c : filePanel.getComponents()){
+        c.setBackground(Color.BLACK);
+        c.setForeground(Color.WHITE);
+        filePanel.setBackground(Color.BLACK);
+        c.setFocusable(false);
+        }
+        feedbackArea.setBackground(Color.BLACK);
+        feedbackArea.setForeground(Color.WHITE);
+        resultTable.setBackground(Color.BLACK);
+        resultTable.setForeground(Color.WHITE);
+        resultTable.setFillsViewportHeight(true);
+        tableScrollPane.getViewport().setBackground(Color.BLACK);
+        });
+
+        LM.addActionListener(e -> {
+        mode = 2;
+
+             for(Component c : topPanel.getComponents()){
+                c.setBackground(Color.WHITE);
+                c.setForeground(Color.BLACK);
+            topPanel.setBackground(Color.WHITE);
+            c.setFocusable(false);
+            }
+            for(Component c : fileButtonPanel.getComponents()){
+                c.setBackground(Color.WHITE);
+                c.setForeground(Color.BLACK);
+                fileButtonPanel.setBackground(Color.WHITE);
+                c.setFocusable(false);
+                }
+                for(Component c : filePanel.getComponents()){
+                    c.setBackground(Color.WHITE);
+                    c.setForeground(Color.BLACK);
+                    filePanel.setBackground(Color.WHITE);
+                    c.setFocusable(false);
+                    }
+                    feedbackArea.setBackground(Color.WHITE);
+                    feedbackArea.setForeground(Color.BLACK);
+                    resultTable.setBackground(Color.WHITE);
+                    resultTable.setForeground(Color.BLACK);
+                    resultTable.setFillsViewportHeight(true);
+                    tableScrollPane.getViewport().setBackground(Color.WHITE);
+                    });
+
+    }
+
+
+public static void changeUserCredentials(String currentName, String currentPassword, String newName,String newPassword) {
 if(UserManager.userNameAlreadyExists(newName)){
     JOptionPane.showMessageDialog(null, "Username already exists.");
     return;

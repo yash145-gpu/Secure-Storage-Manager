@@ -26,43 +26,54 @@ public class AdminTools {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BorderLayout());
         JPanel queryInputPanel = new JPanel(new BorderLayout());
-        queryInput = new JTextArea(10, 50);
+        queryInput = new JTextArea("Enter SQL query here",10, 50);
         queryInput.setLineWrap(true);
-        JScrollPane queryScrollPane = new JScrollPane(queryInput);
+        queryInput.setFont(new Font("Arial", 0, 16));
+       
         JButton executeQueryButton = new JButton("Execute SQL Query");
 
         queryInputPanel.add(new JLabel("Enter SQL Query:"), BorderLayout.NORTH);
-        queryInputPanel.add(queryScrollPane, BorderLayout.CENTER);
+        queryInputPanel.add(queryInput, BorderLayout.CENTER);
         JPanel toolPanel = new JPanel();
-        toolPanel.setLayout(new BoxLayout(toolPanel, BoxLayout.Y_AXIS));
         toolPanel.setPreferredSize(new Dimension(200, 500));
-        toolPanel.add(view);
+       
         JButton viewF = new JButton("View  Files");
-        toolPanel.add(viewF);
         JButton rm_usr = new JButton("Remove User");
-        toolPanel.add(rm_usr);
         JButton rm_fl = new JButton("Remove Files");
-        toolPanel.add(rm_fl);
         JButton vm = new JButton("VACUUM DB");
-        toolPanel.add(vm);
         JButton reset = new JButton("Reset Admin Name/Password");
+        JButton lo = new JButton("Log Out");
+        JButton DM = new JButton("Dark Mode");
+        JButton LM = new JButton("Light Mode");
+        toolPanel.add(view);
+        toolPanel.add(viewF);
+        toolPanel.add(rm_usr);
+        toolPanel.add(rm_fl);
         toolPanel.add(reset);
-
+        toolPanel.add(vm); 
+        toolPanel.add(DM);
+        toolPanel.add(LM);
+        toolPanel.add(lo);
+        for(Component c : toolPanel.getComponents()){
+            c.setPreferredSize(new Dimension(180,70));
+            c.setFocusable(false);
+        }
         queryInputPanel.add(toolPanel, BorderLayout.WEST);
         queryInputPanel.add(executeQueryButton, BorderLayout.SOUTH);
 
         feedbackArea = new JTextArea(5, 50);
+        feedbackArea.setFont(new Font("Arial", 0, 16));
         feedbackArea.setEditable(false);
 
         tableModel = new DefaultTableModel();
         JTable resultTable = new JTable(tableModel);
-
         JPanel jpl = new JPanel();
         jpl.setLayout(new BorderLayout());
         jpl.add(new JScrollPane(feedbackArea), BorderLayout.NORTH);
         jpl.add(new JScrollPane(resultTable), BorderLayout.CENTER);
         JScrollPane tableScrollPane = new JScrollPane(jpl);
         tableScrollPane.setPreferredSize(new Dimension(700, 1000));
+        
 
         infoPanel.add(tableScrollPane, BorderLayout.EAST);
         infoPanel.add(queryInputPanel, BorderLayout.CENTER);
@@ -90,12 +101,12 @@ public class AdminTools {
                 DbHandler.deletefile(feedbackArea, fs, 0);
             }
         });
-        JButton lo = new JButton("Logout");
+      
         lo.addActionListener(e -> {
             GUI.login.setVisible(true);
             mainfr.dispose();
         });
-        toolPanel.add(lo);
+        
         vm.addActionListener(e -> {
             String query = "VACUUM";
             DbHandler.executeSQLQuery(feedbackArea, query, tableModel);
@@ -145,10 +156,44 @@ public class AdminTools {
                 changeAdminCredentials(ctt, cpp, cnn, ppnt);
             });
         });
+        DM.addActionListener(e -> {
+            for(Component c : toolPanel.getComponents()){
+                c.setBackground(Color.BLACK);
+                c.setForeground(Color.WHITE);
+            }
+          feedbackArea.setBackground(Color.BLACK);
+          feedbackArea.setForeground(Color.WHITE);
+          for(Component c : queryInputPanel.getComponents()){
+            c.setBackground(Color.BLACK);
+            c.setForeground(Color.WHITE);
+        }
+       resultTable.setBackground(Color.BLACK);
+       resultTable.setForeground(Color.WHITE);
+       resultTable.setFillsViewportHeight(true);
+       tableScrollPane.getViewport().setBackground(Color.BLACK);
+       toolPanel.setBackground(Color.GRAY);
+        });
+    
+    LM.addActionListener(e -> {
+        for(Component c : toolPanel.getComponents()){
+            c.setBackground(Color.WHITE);
+            c.setForeground(Color.BLACK);
+        }
+      feedbackArea.setBackground(Color.WHITE);
+      feedbackArea.setForeground(Color.BLACK);
+      for(Component c : queryInputPanel.getComponents()){
+        c.setBackground(Color.WHITE);
+        c.setForeground(Color.BLACK);
     }
+    toolPanel.setBackground(Color.GRAY);
+   resultTable.setBackground(Color.WHITE);
+   resultTable.setForeground(Color.BLACK);
+   resultTable.setFillsViewportHeight(true);
+       tableScrollPane.getViewport().setBackground(Color.WHITE);
+    });
+}
 
-    public static void changeAdminCredentials(String currentAdminName, String currentPassword, String newAdminName,
-            String newPassword) {
+    public static void changeAdminCredentials(String currentAdminName, String currentPassword, String newAdminName,String newPassword) {
         currentPassword = UserManager.hashPassword(currentPassword);
         newPassword = UserManager.hashPassword(newPassword);
         try (Connection conn = DriverManager.getConnection(DbHandler.DB_URL)) {
@@ -180,5 +225,6 @@ public class AdminTools {
             JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
         }
     }
+
 
 }
