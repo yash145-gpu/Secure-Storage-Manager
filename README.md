@@ -18,4 +18,7 @@
 - Maven : ``java -jar target/Secure_Storage_Manager-1.0-SNAPSHOT.jar``
 - JAR   : ``java -jar SecureStorageManager.jar``
 
+## Installation
+- Windows : Go to release tab and then install and run ``Secure-Storage-Installer_v1.0.0`` all dependencies are included.
+
 
