@@ -15,14 +15,12 @@ import java.util.concurrent.Executors;
  * SecurityTools.java
  * AES-256 CBC PKCS5 Padding encyption/decryption
  * SHA-256/512 message digest for file checksums
- * 
  * @author Yash Shinde
  */
 
 public class SecurityTools {
 
     // Multithreading with 4 executor threads for concurrent cryptograpic operations
-
     private static final ExecutorService executor = Executors.newFixedThreadPool(4);
     private static final String DB_URL = "jdbc:sqlite:unified.db";
 
@@ -35,7 +33,7 @@ public class SecurityTools {
                 float size = file.length();
                 boolean localD = false;
                 int Jch = JOptionPane.showConfirmDialog(null,
-                        "Size of file is " + size / 1024 * 1024 + "Mb"
+                        "Size of file is " + size / (1024*1024) + "Mb"
                                 + "\nFiles greater than 500mb will be encrypted locally"
                                 + "\nWant to save file on local directory instead of database ?");
                 if (Jch == JOptionPane.YES_OPTION) {
@@ -204,7 +202,7 @@ public class SecurityTools {
                         String encodedKey = keyRs.getString("key");
                         byte[] decodedKey = Base64.getDecoder().decode(encodedKey); // Key decoded to byte array for decryption
 
-                        byte[] iv = keyRs.getBytes("IniVec"); // iv is already varbinary
+                        byte[] iv = keyRs.getBytes("IniVec"); // iv is varbinary
                         IvParameterSpec ivspec = new IvParameterSpec(iv);
 
                         SecretKey secretKey = new SecretKeySpec(decodedKey, "AES"); // key spec from decoded key
@@ -340,7 +338,7 @@ public class SecurityTools {
         File userDirectory = new File("local/" + GUI.loggedInUser);
         if (!userDirectory.exists())
             userDirectory.mkdirs();
-        File localFile = new File(userDirectory, file.getName() + ".enc");
+        File localFile = new File(userDirectory, file.getName() + ".enc"); // locally encrypted file with .enc extention
 
         try (FileInputStream fis = new FileInputStream(file);
                 FileOutputStream fos = new FileOutputStream(localFile);
@@ -391,7 +389,7 @@ public class SecurityTools {
     protected static void hashfile(File file, int mode) {
         /*
          * Calculates file checksum with SHA-256/512 
-         * Buffer for large files
+         * Buffered for large files
         */
         executor.submit(() -> {
             String Algo = "SHA-256";
