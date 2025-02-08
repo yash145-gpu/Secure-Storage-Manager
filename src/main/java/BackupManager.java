@@ -2,6 +2,10 @@ import javax.swing.*;
 import java.io.*;
 import java.sql.*;
 
+/** BackupManager.java
+ * Storing and retrieving user files in embedded database
+ * max file size limit = 900mb (SQLite blob)
+ */
 public class BackupManager {
     static final String DB_URL = "jdbc:sqlite:unified.db";
     static final long MAX_FILE_SIZE = 900 * 1024 * 1024; 

@@ -23,6 +23,7 @@ import javax.swing.table.DefaultTableModel;
 /** MainFrame.java
  *  User GUI with all cryptographic,file management functionalities
  *  @author Yash Shinde
+ * @version 1.1.0
  */
 
 public class MainFrame {
@@ -80,6 +81,7 @@ public class MainFrame {
 
         JButton enc = new JButton("AES File Encryption");
         JButton dec = new JButton("AES File Decryption");
+        JButton custDec = new JButton("Custom AES Decryption");
         JButton vf = new JButton("View Files");
         JButton rm_file = new JButton("Remove Files");
         JButton SHA2 = new JButton("SHA-256 File Checksum");
@@ -92,13 +94,14 @@ public class MainFrame {
         fileButtonPanel.add(vk);
         fileButtonPanel.add(enc);
         fileButtonPanel.add(dec);
+        fileButtonPanel.add(custDec);
         fileButtonPanel.add(rm_file);
         fileButtonPanel.add(reset);
         fileButtonPanel.add(saveFileButton);
         fileButtonPanel.add(retrieveFileButton);
         for (Component component : fileButtonPanel.getComponents()) {
                 component.setBackground(Color.GRAY);
-                component.setPreferredSize(new Dimension(200,55));
+                component.setPreferredSize(new Dimension(200,50));
                 component.setFocusable(false);
         }
 
@@ -115,6 +118,9 @@ public class MainFrame {
 
         Logout.addActionListener(e-> {  //logs out to login GUI
             feedbackArea.setText(" ");
+            mode=0;
+            feedbackArea.setBackground(null);
+            feedbackArea.setForeground(null);
             mainframe.dispose(); 
             GUI.login.setVisible(true); 
         });
@@ -138,7 +144,7 @@ public class MainFrame {
         //Fetches keys for user
         vk.addActionListener(e -> DbHandler.executeSQLQuery(feedbackArea,"SELECT* FROM keys WHERE username="+"'"+GUI.loggedInUser+"'",tableModel)); 
           
-        enc.addActionListener(e -> SecurityTools.encryptFileToDatabase()); //AES Encryption
+        enc.addActionListener(e -> SecurityTools.encryptFileToDatabase(null)); //AES Encryption
         dec.addActionListener(e -> SecurityTools.decryptFile()); //AES Decryption
         
         //Fetches files for user
@@ -249,6 +255,7 @@ for(Component c : fileButtonPanel.getComponents()){
                     resultTable.setFillsViewportHeight(true);
                     tableScrollPane.getViewport().setBackground(Color.WHITE);
                     });
+        custDec.addActionListener(e-> SecurityTools.customDecryption());
 
     }
 

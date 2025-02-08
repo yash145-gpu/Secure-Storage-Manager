@@ -3,6 +3,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 
+/**UserManager.java
+ * user registration , hashing & storing user password (SHA256)
+ * @author Yash Shinde
+ * @version 1.1.0
+ */
 class UserManager {
     protected static void registerUser(JTextField usernameField, JPasswordField passwordField) {
         String username = usernameField.getText().trim();
@@ -25,7 +30,7 @@ class UserManager {
             pstmt.setString(1, username);
             pstmt.setString(2, hashPassword(password));
             pstmt.executeUpdate();
-
+            JOptionPane.showMessageDialog(null,"User registration successful");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null,"Error logging in: " + e.getMessage() + "\n");
         }

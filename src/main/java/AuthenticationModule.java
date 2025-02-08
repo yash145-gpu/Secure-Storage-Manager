@@ -3,6 +3,11 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/** AuthenticationModule.java
+ * For user & admin login and keeping last-login time
+ * @author Yash Shinde
+ * @version 1.1.0
+ */
 public class AuthenticationModule {
     private static String typequery;
 

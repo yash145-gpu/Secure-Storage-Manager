@@ -13,16 +13,18 @@ import java.sql.PreparedStatement;
 * Methods for handling backend of database operations
 * Creates necessary tables on startup of system
 * @author Yash Shinde
-*/
+* @version 1.1.0
+ */
 
 public class DbHandler {
     protected static final String DB_URL = "jdbc:sqlite:unified.db"; //Database URL , name : unified.db
     private static final String CREATE_USERDATA_TABLE_SQL = "CREATE TABLE IF NOT EXISTS userdata (id INTEGER PRIMARY KEY AUTOINCREMENT ,username TEXT NOT NULL UNIQUE , password TEXT NOT NULL, Last_Login TEXT)";
     private static final String CREATE_FILES_TABLE_SQL = "CREATE TABLE IF NOT EXISTS files(id INTEGER PRIMARY KEY AUTOINCREMENT,filename TEXT NOT NULL,filedata BLOB NOT NULL,username TEXT NOT NULL, isEncrypted INTEGER NOT NULL DEFAULT 0)";
-    private static final String CREATE_KEYS_TABLE_SQL = "CREATE TABLE IF NOT EXISTS keys (keyId INTEGER PRIMARY KEY AUTOINCREMENT,id INTEGER, username TEXT NOT NULL , filename TEXT NOT NULL, key TEXT NOT NULL,IniVec VARBINARY(16) NOT NULL,FOREIGN KEY (id) REFERENCES files(id) ON DELETE CASCADE,FOREIGN KEY (username) REFERENCES userdata(username) ON DELETE CASCADE)";
+    private static final String CREATE_KEYS_TABLE_SQL = "CREATE TABLE IF NOT EXISTS keys (keyId INTEGER PRIMARY KEY AUTOINCREMENT,id INTEGER, username TEXT NOT NULL , filename TEXT NOT NULL, key TEXT NOT NULL,IniVec TEXT NOT NULL,FOREIGN KEY (id) REFERENCES files(id) ON DELETE CASCADE,FOREIGN KEY (username) REFERENCES userdata(username) ON DELETE CASCADE)";
     private static final String CREATE_ADMIN_DATA_TABLE_SQL = "CREATE TABLE IF NOT EXISTS Admindata (id INTEGER PRIMARY KEY AUTOINCREMENT ,AdminName TEXT NOT NULL UNIQUE , password TEXT NOT NULL, Last_Login TEXT)";
+
     static void setupDatabase() {
-     
+        //Initializes all tables and adds default admin if no admins exist
         try (Connection conn = DriverManager.getConnection(DB_URL);
                 Statement stmt = conn.createStatement()) {
             stmt.execute("PRAGMA foreign_keys = ON"); //Foreign key support
@@ -35,7 +37,8 @@ public class DbHandler {
             JOptionPane.showMessageDialog(null,"Error setting up database: \n" + e.getMessage() + "\n");
         }
     }
-static void AdminInit(){  //Initializes default Admin 
+static void AdminInit(){
+        //Initializes default Admin
     String initAdm = UserManager.hashPassword("Admin");
     String checkAdminSQL = "SELECT COUNT(*) FROM Admindata";
     try (Connection conn = DriverManager.getConnection(DB_URL); PreparedStatement pstmtCheck = conn.prepareStatement(checkAdminSQL)) { 
