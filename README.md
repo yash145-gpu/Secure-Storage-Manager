@@ -1,3 +1,5 @@
+![Secure-Storage-Manager](Resources/Splash.png)
+
 # 🔐 Secure-Storage-Manager 🔒
 
 *A standalone Java based cryptographic file manager built using Maven ,Swing ,SQLite.*
