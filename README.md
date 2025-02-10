@@ -14,6 +14,9 @@
 
 ## Installation
 - Windows : Go to release tab and install and run ``Secure-Storage-Installer_v1.1.0`` all dependencies are included.
+- Linux : Clone the repository then use following scripts to build and run the project 
+   - ``bash build.sh`` 
+   - ``bash run.sh``
 
 ## Build 
 - Maven : ``mvn clean install``
