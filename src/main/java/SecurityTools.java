@@ -318,7 +318,7 @@ public class SecurityTools {
     protected static void customDecryption() {
         /*
          * Custom decryption for user files
-         * select AES 256 encrypted file , encoded key , encoded IV
+         * select AES encrypted file , encoded key , encoded IV
          * Can be used to decrypt files from other clients
          */
         executor.submit(() -> {
@@ -342,7 +342,7 @@ public class SecurityTools {
                 encryptedStream = new BufferedInputStream(new FileInputStream(inputFile));
                 filename = inputFile.getName();
                 String encodedKey = JOptionPane.showInputDialog(null, "Enter the key  for decryption:");
-                if (encodedKey == null) {
+                if (encodedKey == null || encodedKey == "") {
                     return;
                 }
                 // Key decoded to byte array for decryption

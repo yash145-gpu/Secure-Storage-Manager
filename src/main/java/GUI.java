@@ -142,7 +142,7 @@ public class GUI extends JFrame implements Runnable{
         login.add(backgroundPanel, BorderLayout.CENTER);
         login.setVisible(true);
       
-        help.addActionListener(e ->{JOptionPane.showMessageDialog(null,"Secure Storage Manager release 1.0.0 \n\n"
+        help.addActionListener(e ->{JOptionPane.showMessageDialog(null,"Secure Storage Manager release 1.1.0 \n\n"
         +"NEW! : Custom AES Decryption CBC+ECB\n\n"+"AES 256 : Symmetric encryption of files with any extension type , files can be stored on embedded database or local directory based on size ,\ngenerates secure random key and initialization vector.\n\n"
         +"SHA File Checksum : Generates SHA256/512 hash for a file.\n\n"+
         "File Database Backup : Encodes file data and stores directly on embedded database without encryption.\n\n"
@@ -151,7 +151,7 @@ public class GUI extends JFrame implements Runnable{
  
 /*User login , default Admin is created at startup
   *credentials for Admin can be changed in program as well as in source (DbHandler.java)
-  * Default Admin login : username = Admin , password = Admin
+  * Default Admin login : username = "Admin" , password = "Admin"
  */
         Log.addActionListener(e -> {AuthenticationModule.loginUser(0); });  
         Admlog.addActionListener(e -> {AuthenticationModule.loginUser(1);});
