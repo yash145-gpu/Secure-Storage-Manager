@@ -2,7 +2,7 @@
 
 # 🔐 Secure-Storage-Manager 🔒
 
-*A standalone Java based cryptographic file manager built using Maven ,Swing ,SQLite.*
+**A standalone Java based cryptographic file manager built using Maven ,Swing ,SQLite for streamlined symmetric AES encryption and decryption with SHA checksums for file data integrity and secure file and key storage.**
 
 ## Features  
 - **AES-256 encryption.**
@@ -20,12 +20,12 @@
 
 ## Build 
 - Maven : ``mvn clean install``
-- JAR   : ``jar cfm SecureStorageManager.jar MANIFEST.MF -C target\classes\ . ``
+- Bash  : ``bash build.sh`` 
 - jdeps : ``java.base , java.desktop , java.sql``
 
 ## Execute 
 - Maven : ``java -jar target/Secure_Storage_Manager-1.0-SNAPSHOT.jar``
-- JAR   : ``java -jar SecureStorageManager.jar``
+- Bash  : ``bash run.sh``
 
 
 
